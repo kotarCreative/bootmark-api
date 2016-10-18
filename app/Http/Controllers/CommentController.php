@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\MailReport;
 use Illuminate\Http\Request;
 
-use LucaDegasperi\OAuth2Server\Facades\Authorizer;
 use App\Comment, App\Report;
+use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
@@ -20,7 +21,7 @@ class CommentController extends Controller
      */
     public function report($commendID, Request $request)
     {
-        $reporter_id = Authorizer::getResourceOwnerId();
+        $reporter_id = Auth::user()->id;
 
         /* Retrieves the selected comment */
         $comment = Comment::where('id', $commendID)->first();
@@ -30,8 +31,6 @@ class CommentController extends Controller
                 'message' => 'Comment not found',
             ], 404);
         }
-
-        $reporterInfo = User::find($reporter_id);
 
         /* Creates a new report */
         $report = new Report;
