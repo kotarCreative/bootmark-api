@@ -115,7 +115,7 @@ class UserController extends Controller
 
         return response()->json([
             'response' => 'success',
-            'token' => $response->getBody(),
+            'token' => json_decode((string) $response->getBody(), true),
             'user' => User::where('email', $request->input('username'))->first(),
         ]);
     }
