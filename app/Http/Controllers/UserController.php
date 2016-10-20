@@ -102,6 +102,7 @@ class UserController extends Controller
     public function auth(Request $request) {
         $http = new Client();
 
+
         $response = $http->post('http://dev.bootmarkit.dev/oauth/token', [
             'form_params' => [
                 'grant_type' => $request->input('grant_type'),
@@ -113,7 +114,10 @@ class UserController extends Controller
             ],
         ]);
 
-        return json_decode((string) $response->getBody(), true);
-
+        return response()->json([
+            'response' => 'success',
+            'token' => $response->getBody(),
+            'user' => User::where('email', $request->input('username'))->first(),
+        ]);
     }
 }
