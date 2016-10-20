@@ -5,12 +5,10 @@ namespace App\Http\Controllers;
 use App\Jobs\MailReport;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
-use LucaDegasperi\OAuth2Server\Facades\Authorizer;
-
-use DB;
-use App\Jobs\ReportEmail;
 
 use App\Link, App\Media, App\Bootmark, App\User, App\Follower,
     App\Vote, App\SimpleScraper, App\Report;
@@ -28,7 +26,7 @@ class BootmarkController extends Controller
     public function index(Request $request)
     {
 
-        $user_id = Authorizer::getResourceOwnerId();
+        $user_id = Auth::user()->id;
         $lat = $request->input('lat');
         $lng = $request->input('lng');
         $rad = $request->input('rad');
@@ -118,7 +116,7 @@ class BootmarkController extends Controller
     {
         /* Create new Bootmark and set the user_id */
         $bootmark = new Bootmark;
-        $bootmark->user_id = Authorizer::getResourceOwnerId();
+        $bootmark->user_id = Auth::user()->id;
 
         if (in_array($request->input('type'), ['photo', 'link', 'text'])) {
 
@@ -215,7 +213,7 @@ class BootmarkController extends Controller
      */
     public function report($bootmarkID, Request $request)
     {
-        $reporter_id = Authorizer::getResourceOwnerId();
+        $reporter_id = Auth::user()->id;
 
         /* Retrieves the selected bootmark */
         $bootmark = Bootmark::where('id', $bootmarkID)->first();
@@ -252,7 +250,7 @@ class BootmarkController extends Controller
      */
     public function vote($bootmarks, Request $request)
     {
-        $user_id = Authorizer::getResourceOwnerId();
+        $user_id = Auth::user()->id;
         $bootmark = Bootmark::find($bootmarks);
 
         /* 1 for upvote, 0 for downvote */

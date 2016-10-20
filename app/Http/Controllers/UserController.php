@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use App\Jobs\MailReport;
 use App\User, App\Report;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
-use LucaDegasperi\OAuth2Server\Facades\Authorizer;
+use GuzzleHttp\Client;
 
 class UserController extends Controller
 {
@@ -51,25 +52,11 @@ class UserController extends Controller
             $user->save();
         }
 
-        /* Checks for authorization parameters in the request */
-        if ($request->has('grant_type') &&
-            $request->has('client_id') &&
-            $request->has('client_secret') &&
-            $request->has('username') &&
-            $request->has('password')
-        ) {
-            $authorizer = Authorizer::issueAccessToken();
-        } else {
-            $authorizer = ['message' => 'Missing parameters (see errors for needed parameters)',
-                            'error'  => 'grant_type, client_id, client_secret, username, password'
-            ];
-        }
-
         return Response::json([
             'response'      =>  'Success',
             'user_id'       =>  $user->id,
             'message'       =>  'User successfully created',
-            'authorization' =>  $authorizer
+            'authorization' =>  ''
         ]);
     }
 
@@ -84,7 +71,7 @@ class UserController extends Controller
      */
     public function report($userID, Request $request)
     {
-        $reporter_id = Authorizer::getResourceOwnerId();
+        $reporter_id = Auth::user()->id;
 
         /* Retrieves the selected user */
         $user = User::where('id', $userID)->first();
@@ -94,8 +81,6 @@ class UserController extends Controller
                 'message' => 'User not found',
             ], 404);
         }
-
-        $reporterInfo = User::find($reporter_id);
 
         /* Creates a new report */
         $report = new Report;
@@ -112,5 +97,23 @@ class UserController extends Controller
             'response' => 'success',
             'message' => 'User has been reported',
         ]);
+    }
+
+    public function auth(Request $request) {
+        $http = new Client();
+
+        $response = $http->post('http://dev.bootmarkit.dev/oauth/token', [
+            'form_params' => [
+                'grant_type' => $request->input('grant_type'),
+                'client_id' => $request->input('client_id'),
+                'client_secret' => $request->input('client_secret'),
+                'username' => $request->input('username'),
+                'password' => $request->input('password'),
+                'scope' => '',
+            ],
+        ]);
+
+        return json_decode((string) $response->getBody(), true);
+
     }
 }
