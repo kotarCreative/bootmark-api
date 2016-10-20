@@ -37,8 +37,10 @@ class BootmarkController extends Controller
         /* Create the join for media and links meta data */
         $bootmarks = DB::table('bootmarks')
             ->leftJoin('media','bootmarks.media_id','=','media.id')
-            ->leftJoin('links','bootmarks.link_id','=','links.id')
-            ->leftJoin('votes','bootmarks.id','=','votes.bootmark_id')
+            ->leftJoin('links','bootmarks.link_id','=','links.id');
+
+        $bootmarks = $bootmarks
+            ->leftJoin(DB::raw("(select * from votes where votes.user_id = $user_id) v"),'bootmarks.id', '=', 'v.bootmark_id')
             ->distinct();
 
         $discovered = User::find($user_id)->discoveredBootmarks;
@@ -90,7 +92,7 @@ class BootmarkController extends Controller
                      'media.media_type',
                      'media.path',
                      'media.mime_type',
-                     'votes.vote')->simplePaginate(10);
+                     'v.vote')->simplePaginate(20);
 
         /* Get a count of comments made on each bootmark being returned. */
         foreach($bootmarks as $bootmark) {
