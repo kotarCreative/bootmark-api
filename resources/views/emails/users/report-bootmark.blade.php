@@ -16,13 +16,13 @@
     <p>By reporting offensive and malicious content you are playing an important role in keeping this app awesome. You rock.</p>
 
     <p>Just as a reminder here is what you reported to us.</p>
-    <p>{{ $bodyMessage }}</p>
+    <p>"{{ $bodyMessage }}"</p>
     <p>Mike | Scott | Dave | Isaac | Cody</p>
 
-    <div style='display: inline-block;'>
+    <div style='display: inline;'>
         <img style='width: 50px; height: 50px;' src='{{ $message->embed(public_path() . '/img/tree-logo.png') }} ' width='50' height='50' style='border-right: 1px solid #333'/>
     </div>
-    <div style='display: inline-block;'>
+    <div style='display: inline;'>
         <img style='width: 200px; height: 50px;' src='{{ $message->embed(public_path() . '/img/wordmark.png') }}' width='200' height='50' /><br />
         <span>www.bootmark.ca</span>
     </div>
