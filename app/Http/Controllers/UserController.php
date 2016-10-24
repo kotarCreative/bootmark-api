@@ -52,9 +52,6 @@ class UserController extends Controller
 
             $user->save();
 
-            $this->userEmail = $user->email;
-            $this->userName = $user->name;
-
             dispatch(new MailNewUser($user->id));
         }
 
