@@ -1,3 +1,5 @@
+<link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+
 <h1 style='font-family: "Lato" Open sans;font-weight: 600'>A bootmark was reported</h1>
 
 <p>The bootmark was reported by the user with id: {{ $reporter_id }}</p>

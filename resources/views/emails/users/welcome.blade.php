@@ -1,3 +1,5 @@
+<link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+
 <h1 style='font-family: "Lato" Open sans;font-weight: 600'>Hello {{ $username }},</h1>
 <h1 style='font-family: "Lato" Open sans;font-weight: 600'>Welcome to Bootmark!</h1>
 
