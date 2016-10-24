@@ -40,6 +40,7 @@
         #url-link {
             text-decoration:    none;
             color:              #333;
+            margin-left:        4px;
         }
 
         #url-link:hover {
