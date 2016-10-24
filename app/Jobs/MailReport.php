@@ -50,7 +50,7 @@ class MailReport extends Job implements ShouldQueue
             $view = 'emails.users.report-bootmark';
             $data['bootmark_id'] = $report->bootmark_id;
         } else if (!($report->comment_id == null)) {
-            $adminView = 'email.users.report-comment';
+            $adminView = 'emails.users.report-comment';
             $view = 'emails.users.report-comment';
             $data['comment_id'] = $report->bootmark_id;
         } else {
