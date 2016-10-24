@@ -13,8 +13,8 @@ class MailNewUser extends Job implements ShouldQueue
     use InteractsWithQueue, SerializesModels;
 
     protected $userID;
-    protected $userName;
-    protected $userEmail;
+    protected $username;
+    protected $email;
 
     /**
      * Create a new job instance.*
@@ -32,16 +32,15 @@ class MailNewUser extends Job implements ShouldQueue
     public function handle()
     {
         $user = User::find($this->userID);
-        $this->userName = $user->first_name.' '.$user->last_name;
-        $this->userEmail = $user->email;
+        $this->email = $user->email;
 
         $data = array(
-            'username'      =>  $this->userName,
+            'username'  =>  $user->name,
         );
 
         /* Segregates each email */
         Mail::send('emails.users.welcome', $data, function ($message) {
-            $message->to($this->userEmail, $this->userName)->subject('Welcome to Bootmark');
+            $message->to($this->email, $this->username)->subject('Welcome to Bootmark');
         });
 
     }

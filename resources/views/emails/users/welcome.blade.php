@@ -22,10 +22,10 @@
     <p>Mike | Scott | Dave | Isaac | Cody</p>
 
     <div style='display: inline;'>
-        <img style='width: 200px; height: 50px;' src='{{ $message->embed(public_path() . '/img/wordmark.png') }}' width='200' height='50' />
+        <img style='width: 40px; height: 40px; border-right: thin solid #333' src='{{ $message->embed(public_path() . '/img/tree-logo.png') }}'/>
     </div>
     <div style='display: inline;'>
-        <img style='width: 50px; height: 50px;' src='{{ $message->embed(public_path() . '/img/tree-logo.png') }} ' width='50' height='50' style='border-right: 1px solid #333'/>
-    </div><br />
+        <img style='width: 120px; height: 30px;' src='{{ $message->embed(public_path() . '/img/wordmark.png') }}'/>
+    </div><br/>
     <p>www.bootmark.ca</p>
 </body>
