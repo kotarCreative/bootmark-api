@@ -13,6 +13,6 @@
 
 <span>Mike|Scott|Dave|Isaac|Cody</span>
 
-<p><img src='{{ $message->embed(public_path() . '/img/tree-logo.png') }} ' width='150' height='150' style='border-right: 1px solid #333'/>
-<img src='{{ $message->embed(public_path() . '/img/wordmark.png') }}' width='200' height='50' />
+<p><img src='{{ $message->embed(public_path() . '/img/tree-logo.png') }} ' width='50' height='50' style='border-right: 1px solid #333'/>
+<img src='{{ $message->embed(public_path() . '/img/wordmark.png') }}' width='200' height='50' /><br />
 <span>www.bootmark.ca</span></p>
