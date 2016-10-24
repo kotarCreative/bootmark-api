@@ -27,7 +27,7 @@
     <div style='display: inline;'>
         <ul style="display: inline-block; margin: 0; padding: 0; list-style-type: none;">
             <li style="margin: 0;"><img style='width: 120px; height: 30px;' src='{{ $message->embed(public_path() . '/img/wordmark.png') }}'/></li>
-            <li style="margin: 0; text-align: center;">www.bootmark.ca</li>
+            <li style="margin: 0;">www.bootmark.ca</li>
         </ul>
     </div><br/>
 </body>
