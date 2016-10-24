@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -51,6 +52,10 @@ class UserController extends Controller
 
             $user->save();
         }
+
+        Mail::send('emails.users.welcome', ['username' => $user->name], function ($message) {
+            $message->to($user->email, $user->name)->subject('Welcome to Bootmark');
+        });
 
         return Response::json([
             'response'      =>  'Success',

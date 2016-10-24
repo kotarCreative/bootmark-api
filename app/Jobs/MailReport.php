@@ -46,18 +46,21 @@ class MailReport extends Job implements ShouldQueue
         );
 
         if (!($report->bootmark_id == null)) {
-            $view = 'report-bootmark';
+            $adminView = 'emails.admin.report-bootmark';
+            $view = 'emails.users.report-bootmark';
             $data['bootmark_id'] = $report->bootmark_id;
         } else if (!($report->comment_id == null)) {
-            $view = 'report-comment';
+            $adminView = 'email.users.report-comment';
+            $view = 'emails.users.report-comment';
             $data['comment_id'] = $report->bootmark_id;
         } else {
-            $view = 'report-user';
+            $adminView = 'emails.users.report-user';
+            $view = 'emails.users.report-user';
             $data['user_id'] = $report->bootmark_id;
         }
 
         /* Segregates each email */
-        Mail::send($view, $data, function ($message) {
+        Mail::send($adminView, $data, function ($message) {
             $message->to('Info@bootmark.ca', 'Bootmark Team')->subject('Report has been generated');
         });
 
