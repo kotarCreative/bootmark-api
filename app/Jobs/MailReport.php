@@ -17,9 +17,7 @@ class MailReport extends Job implements ShouldQueue
     protected $reporterEmail;
 
     /**
-     * Create a new job instance.
-     *
-     * @return void
+     * Create a new job instance.*
      */
     public function __construct($reportID)
     {

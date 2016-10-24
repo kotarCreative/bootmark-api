@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\MailNewUser;
 use App\Jobs\MailReport;
 use App\User, App\Report;
 use Illuminate\Http\Request;
@@ -10,7 +11,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use GuzzleHttp\Client;
-use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -51,11 +51,12 @@ class UserController extends Controller
             $user->radius = 2000;
 
             $user->save();
-        }
 
-        Mail::send('emails.users.welcome', ['username' => $user->name], function ($message) {
-            $message->to($user->email, $user->name)->subject('Welcome to Bootmark');
-        });
+            $this->userEmail = $user->email;
+            $this->userName = $user->name;
+
+            dispatch(new MailNewUser($user->id));
+        }
 
         return Response::json([
             'response'      =>  'Success',
