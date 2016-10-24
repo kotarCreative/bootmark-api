@@ -25,7 +25,9 @@
         <img style='width: 40px; height: 40px; border-right: thin solid #333' src='{{ $message->embed(public_path() . '/img/tree-logo.png') }}'/>
     </div>
     <div style='display: inline;'>
-        <img style='width: 120px; height: 30px;' src='{{ $message->embed(public_path() . '/img/wordmark.png') }}'/>
+        <ul style="display: inline-block; margin: 0; padding: 0; list-style-type: none;">
+            <li style="margin: 0;"><img style='width: 120px; height: 30px;' src='{{ $message->embed(public_path() . '/img/wordmark.png') }}'/></li>
+            <li style="margin: 0; text-align: center;">www.bootmark.ca</li>
+        </ul>
     </div><br/>
-    <p>www.bootmark.ca</p>
 </body>
