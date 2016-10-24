@@ -18,10 +18,10 @@
     <span>Mike | Scott | Dave | Isaac | Cody</span>
 
     <div style='display: inline-block;'>
-        <img src='{{ $message->embed(public_path() . '/img/tree-logo.png') }} ' width='50' height='50' style='border-right: 1px solid #333'/>
+        <img style='width: 50px; height: 50px;' src='{{ $message->embed(public_path() . '/img/tree-logo.png') }} ' width='50' height='50' style='border-right: 1px solid #333'/>
     </div>
     <div style='display: inline-block;'>
-        <img src='{{ $message->embed(public_path() . '/img/wordmark.png') }}' width='200' height='50' /><br />
+        <img style='width: 200px; height: 50px;' src='{{ $message->embed(public_path() . '/img/wordmark.png') }}' width='200' height='50' /><br />
         <span>www.bootmark.ca</span>
     </div>
 </body>
