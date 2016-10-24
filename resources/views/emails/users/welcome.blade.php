@@ -16,6 +16,6 @@
 
 <p>Mike|Scott|Dave|Isaac|Cody</p>
 
-<img src='/resources/assets/Images/tree-logo.png' width='150' height='150' style='border-right: 1px solid #333'/>
-<p><img src='/resources/assets/Images/wordmark.png' width='200' height='50' /></p>
-<p>www.bootmark.ca</p>
+<p><img src='{{ $message->embed('assets/img/tree-logo.png') }} ' width='150' height='150' style='border-right: 1px solid #333'/>
+<img src='{{ $message->embed('assets/img/wordmark.png') }}' width='200' height='50' />
+<span>www.bootmark.ca</span></p>
