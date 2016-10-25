@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\MailNewUser;
 use App\Jobs\MailReport;
 use App\User, App\Report;
 use Illuminate\Http\Request;
@@ -50,6 +51,8 @@ class UserController extends Controller
             $user->radius = 2000;
 
             $user->save();
+
+            dispatch(new MailNewUser($user->id));
         }
 
         return Response::json([
