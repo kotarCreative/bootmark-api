@@ -1,5 +1,5 @@
 <head>
-    <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Lato:600,800' rel='stylesheet' type='text/css'>
 </head>
 <style>
         h1 {
