@@ -1,4 +1,4 @@
-<link href='http://fonts.googleapis.com/css?family=Lato:600,800' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Lato:600,800' rel='stylesheet' type='text/css'>
 
 <h1 style='font-family: "Lato" Open sans;font-weight: 800'>A bootmark was reported</h1>
 
