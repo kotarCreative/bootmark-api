@@ -107,6 +107,8 @@ class UserController extends Controller
     /**
      * Returns the specified user information with the total bootmark count, followers count and following count.
      *
+     * @param Integer $userID users id that is passed during the api call e.g. .../users/{userID} 
+     * 
      * @return mixed Returns a json array of the user info.
      */
     public function show($userID) {
