@@ -137,7 +137,7 @@ class UserController extends Controller
     public function auth(Request $request) {
         $http = new Client();
 
-        $response = $http->post('http://local.bootmark.ca/oauth/token', [
+        $response = $http->post('http://dev.bootmark.ca/oauth/token', [
             'form_params' => [
                 'grant_type' => $request->input('grant_type'),
                 'client_id' => $request->input('client_id'),
