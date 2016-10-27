@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Bootmark;
+use App\Follower;
 use App\Jobs\MailNewUser;
 use App\Jobs\MailReport;
 use App\User, App\Report;
@@ -20,7 +22,7 @@ class UserController extends Controller
      * Checks the new users information and creates a new user
      * if the email and username havent been taken.
      *
-     * @param request $request The post request.
+     * @param Illuminate\Http\Request $request The post request.
      *
      * @return json A Json response.
      */
@@ -68,7 +70,7 @@ class UserController extends Controller
      * Generates a report for the specified user
      *
      * @param int $userID The user that is being reported.
-     * @param request $request The request object containing all the inputs.
+     * @param Illuminate\Http\Request $request The request object containing all the inputs.
      *
      * @return Returns a success message or a failure message.
      */
@@ -102,6 +104,38 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * Returns the specified user information with the total bootmark count, followers count and following count.
+     *
+     * @param Integer $userID users id that is passed during the api call e.g. .../users/{userID} 
+     * 
+     * @return mixed Returns a json array of the user info.
+     */
+    public function show($userID) {
+
+        $user = User::find($userID);
+
+        $bootmarkCount = Bootmark::where("id", $userID)->count();
+        $followerCount = Follower::where("user_id", $userID)->count();
+        $followingCount = Follower::where("follower_id", $userID)->count();
+
+        $user->bootmarks = $bootmarkCount;
+        $user->followers = $followerCount;
+        $user->following = $followingCount;
+
+        return response()->json([
+            'response' => 'success',
+            'user' => $user
+        ]);
+    }
+
+    /**
+     * Authorizes a user using passport oauth and will return a token.
+     *
+     * @param Illuminate\Http\Request $request The request object containing all the inputs.
+     *
+     * @return mixed Returns a json response with a token and user info
+     */
     public function auth(Request $request) {
         $http = new Client();
 
