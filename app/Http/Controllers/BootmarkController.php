@@ -512,7 +512,7 @@ class BootmarkController extends Controller
     private function isYouTube($url)
     {
 
-        return strpos($url, 'youtube.com') || strpos($url, 'youtu.be' || strpos($url, 'y2u.be'));
+        return strpos($url, 'youtube.com') || strpos($url, 'youtu.be') || strpos($url, 'y2u.be');
 
     }
 
