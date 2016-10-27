@@ -19,15 +19,16 @@ Route::group(['prefix' => 'v1'], function() {
 });
 
 Route::group(['prefix' => 'v1', 'middleware' => 'auth:api'], function () {
-    /* Resources */
-    Route::resource('bootmarks', 'BootmarkController', ['except' => ['create', 'show', 'edit']]);
-
-    /* Post Requests */
+    /* Bootmark Requests */
+    Route::get('bootmarks/{bootmarkID}/photo', 'BootmarkController@getPhoto');
     Route::post('bootmarks/{bootmarks}/vote','BootmarkController@vote');
     Route::post('bootmarks/{bootmarkID}/report','BootmarkController@report');
-    Route::post('comments/{commentID}/report','CommentController@report');
-    Route::post('users/{userID}/report','UserController@report');
+    Route::resource('bootmarks', 'BootmarkController', ['except' => ['create', 'show', 'edit']]);
 
-    /* Get Requests */
-    Route::get('bootmarks/{bootmarkID}/photo', 'BootmarkController@getPhoto');
+    /* Comment Requests */
+    Route::post('comments/{commentID}/report','CommentController@report');
+
+    /* User Requests */
+    Route::get('users/{userID}', 'UserController@show'); // TODO: Convert to resource
+    Route::post('users/{userID}/report','UserController@report');
 });

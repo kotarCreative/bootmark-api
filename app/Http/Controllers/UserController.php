@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Bootmark;
+use App\Follower;
 use App\Jobs\MailNewUser;
 use App\Jobs\MailReport;
 use App\User, App\Report;
@@ -102,6 +104,38 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * Returns the specified user information with the total bootmark count, followers count and following count.
+     *
+     * @param request $request The request object containing all the inputs.
+     *
+     * @return mixed Returns a json array of the user info.
+     */
+    public function show($userID, Request $request) {
+
+        $user = User::find($userID);
+
+        $bootmarkCount = Bootmark::all()->where("id", $userID)->count();
+        $followerCount = Follower::all()->where("user_id", $userID)->count();
+        $followingCount = Follower::all()->where("follower_id", $userID)->count();
+
+        $user['bootmarks'] = $bootmarkCount;
+        $user['followers'] = $followerCount;
+        $user['following'] = $followingCount;
+
+        return response()->json([
+            'response' => 'success',
+            'user' => $user
+        ]);
+    }
+
+    /**
+     * Authorizes a user using passport oauth and will return a token.
+     *
+     * @param request $request The request object containing all the inputs.
+     *
+     * @return mixed Returns a json response with a token and user info
+     */
     public function auth(Request $request) {
         $http = new Client();
 
