@@ -15,6 +15,7 @@ class Photo extends Model
      *
      * The directory structure for the disk will look like this: Year -> Month -> Day
      *
+     * @param string $diskName The disk name that will be used for storing the photo
      * @param string $year The year of the top parent directory
      * @param string $month The month of a given year parent directory
      * @param string $day The day of a given month parent directory
@@ -42,6 +43,7 @@ class Photo extends Model
     /**
      * Takes a file from a HTTP request and will store it onto the disk.
      *
+     * @param string $diskName The disk name that will be used for storing the photo
      * @param file $file A photo file that has been uploaded during the HTTP request.
      *
      * @return string Returns the generated filename of the photo
@@ -62,11 +64,27 @@ class Photo extends Model
         return $year.'/'.$month.'/'.$day.'/'.$filename;
     }
 
+    /**
+     * Takes a disk name and file path to determine if it exists on the server.
+     *
+     * @param string $diskName The disk name that will be used for storing the photo
+     * @param string $path Path of the file to check on the disk
+     *
+     * @return boolean Returns true if the path exists on the disk
+     */
     public static function photoExists($diskName, $path)
     {
         return Storage::disk($diskName)->exists($path);
     }
 
+    /**
+     *Takes a disk name and file path and returns the associated file on the server
+     *
+     * @param string $diskName The disk name that will be used for storing the photo
+     * @param string $path Path of the file to check on the disk
+     *
+     * @return file Returns the file of the path from the disk on the server
+     */
     public static function getPhoto($diskName, $path)
     {
         return Storage::disk($diskName)->get($path);

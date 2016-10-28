@@ -9,13 +9,10 @@ use App\Jobs\MailReport;
 use App\Photo;
 use App\ProfilePicture;
 use App\User, App\Report;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use GuzzleHttp\Client;
 
@@ -134,16 +131,38 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * Soft deletes a user and all its activity from the database.
+     *
+     * @param int $userID The user id to be deleted.
+     *
+     * @return json Returns a success or failure message.
+     */
     public function destroy($userID)
     {
 
     }
 
+    /**
+     * Updates an existing user.
+     *
+     * @param int $userID The user id to be updated.
+     * @param Illuminate\Http\Request $request The Request object with all the inputs.
+     *
+     * @return json Returns a success or failure message.
+     */
     public function update($userID, Request $request)
     {
 
     }
 
+    /**
+     * Retrieves a users profile photo from the server.
+     *
+     * @param int $userID The user id to be updated.
+     *
+     * @return \Illuminate\Http\JsonResponse showing error or the photo being retrieved.
+     */
     public function getPhoto($userID)
     {
         /* Retrieves the selected user */
@@ -176,6 +195,13 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Processes an http request and will store a profile photo on the server for the user.
+     *
+     * @param Illuminate\Http\Request $request The request object containing all the inputs.
+     *
+     * @return json Returns a success or failure message and the profile picture if successful.
+     */
     public function savePhoto(Request $request)
     {
         $file = $request->file('photo');
