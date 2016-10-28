@@ -29,6 +29,8 @@ Route::group(['prefix' => 'v1', 'middleware' => 'auth:api'], function () {
     Route::post('comments/{commentID}/report','CommentController@report');
 
     /* User Requests */
-    Route::get('users/{userID}', 'UserController@show'); // TODO: Convert to resource
+    Route::resource('users', 'UserController', ['only' => ['show', 'update', 'destroy']]);
+    Route::get('users/{userID}/photo', 'UserController@getPhoto');
+    Route::post('users/{userID}/photo', 'UserController@savePhoto');
     Route::post('users/{userID}/report','UserController@report');
 });

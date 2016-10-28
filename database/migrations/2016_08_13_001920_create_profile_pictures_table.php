@@ -19,8 +19,9 @@ class CreateProfilePicturesTable extends Migration
             $table->foreign('user_id')->references('id')->on('users');
             $table->index('user_id');
 
-            $table->string('mime_type');
             $table->tinyInteger('current');
+            $table->string('mime_type');
+            $table->string('path');
 
             $table->timestamps();
             $table->softDeletes();
