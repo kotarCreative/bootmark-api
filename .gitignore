@@ -5,8 +5,9 @@ Homestead.json
 .env*
 **/.idea
 **/composer.lock
-**/storage/bootmark-photos/*
-**/storage/photos/*
+**/storage/bootmark-photos
+**/storage/photos
 **/.DS_STORE
 **/oauth-public.key
 **/oauth-private.key
+**/storage/profile-photos

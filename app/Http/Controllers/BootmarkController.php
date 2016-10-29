@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\MailReport;
-use Carbon\Carbon;
+use App\Photo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 use App\Link, App\Media, App\Bootmark, App\User, App\Follower,
@@ -408,7 +407,7 @@ class BootmarkController extends Controller
                 ], 422);
             }
 
-            $media->path = $this->storePhoto($file);
+            $media->path = Photo::storePhoto('bootmark_uploads', $file);
             $media->mime_type = $file->getClientMimeType();
             $media->media_type = "photo";
 
@@ -573,37 +572,6 @@ class BootmarkController extends Controller
     }
 
     /**
-     * Using a year, month and day, it will ensure the correct directories exist on the disk. If they do not, it will
-     * create the directories.
-     *
-     * The directory structure for the disk will look like this: Year -> Month -> Day
-     *
-     * @param string $year The year of the top parent directory
-     * @param string $month The month of a given year parent directory
-     * @param string $day The day of a given month parent directory
-     *
-     * @return void
-     */
-    private function checkPhotoDirectories($year, $month, $day)
-    {
-
-        /* Check for year directory */
-        if (!Storage::disk('photo_uploads')->exists($year)) {
-            Storage::disk('photo_uploads')->makeDirectory($year);
-        }
-
-        /* Check for 'year -> month' directory */
-        if (!Storage::disk('photo_uploads')->exists($year.'/'.$month)) {
-            Storage::disk('photo_uploads')->makeDirectory($year.'/'.$month);
-        }
-
-        /* Check for 'year -> month -> day' directory */
-        if (!Storage::disk('photo_uploads')->exists($year.'/'.$month.'/'.$day)) {
-            Storage::disk('photo_uploads')->makeDirectory($year.'/'.$month.'/'.$day);
-        }
-    }
-
-    /**
      * Returns the photo in a response associated with a given bootmarkID.
      *
      * @param integer $bootmarkID The ID of the bootmark
@@ -638,8 +606,8 @@ class BootmarkController extends Controller
             } else {
 
                 /* If the photo exists */
-                if (Storage::disk('photo_uploads')->exists($media->path)) {
-                    $file = Storage::disk('photo_uploads')->get($media->path);
+                if (Photo::photoExists('bootmark_uploads', $media->path)) {
+                    $file = Photo::getPhoto('bootmark_uploads', $media->path);
                     return response($file)->header('Content-Type', $media->mime_type);
 
                 /* If the photo does not exist */
@@ -651,29 +619,6 @@ class BootmarkController extends Controller
                 }
             }
         }
-    }
-
-    /**
-     * Takes a file from a HTTP request and will store it onto the disk.
-     *
-     * @param file $file A photo file that has been uploaded during the HTTP request.
-     *
-     * @return string Returns the generated filename of the photo
-     */
-    private function storePhoto($file)
-    {
-        $filename = md5($file->getClientOriginalName() . microtime());
-
-        $date = Carbon::now();
-
-        $year = $date->year;
-        $month = $date->month;
-        $day = $date->day;
-
-        $this->checkPhotoDirectories($year, $month, $day);
-        Storage::disk('photo_uploads')->put($year.'/'.$month.'/'.$day.'/'.$filename, File::get($file));
-
-        return $year.'/'.$month.'/'.$day.'/'.$filename;
     }
 
     /**

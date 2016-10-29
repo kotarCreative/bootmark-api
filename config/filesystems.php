@@ -48,9 +48,14 @@ return [
             'root' => storage_path('app'),
         ],
 
-        'photo_uploads' => [
+        'bootmark_uploads' => [
             'driver' => 'local',
-            'root' => storage_path('photos'),
+            'root' => storage_path('bootmark-photos'),
+        ],
+
+        'profile_uploads' => [
+            'driver' => 'local',
+            'root' => storage_path('profile-photos'),
         ],
 
         'public' => [

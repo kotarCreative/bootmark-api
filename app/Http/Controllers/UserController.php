@@ -6,6 +6,8 @@ use App\Bootmark;
 use App\Follower;
 use App\Jobs\MailNewUser;
 use App\Jobs\MailReport;
+use App\Photo;
+use App\ProfilePicture;
 use App\User, App\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -111,8 +113,8 @@ class UserController extends Controller
      * 
      * @return mixed Returns a json array of the user info.
      */
-    public function show($userID) {
-
+    public function show($userID)
+    {
         $user = User::find($userID);
 
         $bootmarkCount = Bootmark::where("id", $userID)->count();
@@ -130,13 +132,129 @@ class UserController extends Controller
     }
 
     /**
+     * Soft deletes a user and all its activity from the database.
+     *
+     * @param int $userID The user id to be deleted.
+     *
+     * @return json Returns a success or failure message.
+     */
+    public function destroy($userID)
+    {
+
+    }
+
+    /**
+     * Updates an existing user.
+     *
+     * @param int $userID The user id to be updated.
+     * @param Illuminate\Http\Request $request The Request object with all the inputs.
+     *
+     * @return json Returns a success or failure message.
+     */
+    public function update($userID, Request $request)
+    {
+
+    }
+
+    /**
+     * Retrieves a users profile photo from the server.
+     *
+     * @param int $userID The user id to be updated.
+     *
+     * @return \Illuminate\Http\JsonResponse showing error or the photo being retrieved.
+     */
+    public function getPhoto($userID)
+    {
+        /* Retrieves the selected user */
+        $user = User::where('id', $userID)->first();
+
+        /* Checks if the user exists  */
+        if ($user == null) {
+            return response()->json([
+                'response' => 'Failure',
+                'message' => 'User not found'
+            ] , 404);
+        }
+
+        else {
+            /* Gets the current profile photo */
+            $profilePicture = ProfilePicture::where('user_id', $userID)->where('current', 1)->first();
+
+            /* If the photo exists */
+            if (Photo::photoExists('profile_uploads', $profilePicture->path)) {
+                $file = Photo::getPhoto('profile_uploads', $profilePicture->path);
+                return response($file)->header('Content-Type', $profilePicture->mime_type);
+
+            /* If the photo does not exist */
+            } else {
+                return response()->json([
+                    'response' => 'Failure',
+                    'message' => 'User profile picture not found'
+                ], 404);
+            }
+        }
+    }
+
+    /**
+     * Processes an http request and will store a profile photo on the server for the user.
+     *
+     * @param Illuminate\Http\Request $request The request object containing all the inputs.
+     *
+     * @return json Returns a success or failure message and the profile picture if successful.
+     */
+    public function savePhoto(Request $request)
+    {
+        $file = $request->file('photo');
+
+        /* Check if file was given */
+        if ($file == null) {
+            return response()->json([
+                'response' => 'Failure',
+                'message' => "missing or invalid 'photo' parameter with attached file"
+            ], 422);
+        }
+
+        /* Check for current parameter */
+        if ($request->input('current') == null) {
+            return response()->json([
+                'response' => 'Failure',
+                'message' => "missing or invalid 'current' parameter"
+            ], 422);
+        }
+
+        /* Update old profile picture current status */
+        if ($request->input('current') == 1) {
+            $currentPicture = ProfilePicture::where('user_id', Auth::user()->id)->where('current', 1)->first();
+            $currentPicture->current = 0;
+            $currentPicture->save();
+        }
+
+        $profilePicture = new ProfilePicture;
+
+        $profilePicture->user_id = Auth::user()->id;
+        $profilePicture->path = Photo::storePhoto('profile_uploads', $file);
+        $profilePicture->mime_type = $file->getClientMimeType();
+        $profilePicture->current = $request->input('current');
+
+        $profilePicture->save();
+
+        /* Return success */
+        return response()->json([
+            'response' => 'Success',
+            'message' => 'Profile pictures successfully added',
+            'data' => $profilePicture
+        ]);
+    }
+
+    /**
      * Authorizes a user using passport oauth and will return a token.
      *
      * @param Illuminate\Http\Request $request The request object containing all the inputs.
      *
      * @return mixed Returns a json response with a token and user info
      */
-    public function auth(Request $request) {
+    public function auth(Request $request)
+    {
         $http = new Client();
 
         $response = $http->post('http://dev.bootmark.ca/oauth/token', [
