@@ -19,8 +19,8 @@ class AuthenticationSeeder extends Seeder
             'id' => env('CLIENT_ID'),
             'secret' => env('CLIENT_SECRET'),
             'name' => 'api',
-            'created_at' => \Carbon\Carbon::now(),
-            'updated_at' => \Carbon\Carbon::now(),
+            'created_at' => \Carbon\Carbon::now('America/Denver'),
+            'updated_at' => \Carbon\Carbon::now('America/Denver'),
         ));
     }
 }
