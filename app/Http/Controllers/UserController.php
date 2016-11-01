@@ -225,8 +225,10 @@ class UserController extends Controller
         /* Update old profile picture current status */
         if ($request->input('current') == 1) {
             $currentPicture = ProfilePicture::where('user_id', Auth::user()->id)->where('current', 1)->first();
-            $currentPicture->current = 0;
-            $currentPicture->save();
+	    if ($currentPicture != null) {
+                $currentPicture->current = 0;
+                $currentPicture->save();
+	    }
         }
 
         $profilePicture = new ProfilePicture;
