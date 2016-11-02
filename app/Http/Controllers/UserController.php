@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Bootmark;
 use App\Follower;
+use App\HttpResponse;
 use App\Jobs\MailNewUser;
 use App\Jobs\MailReport;
 use App\Photo;
@@ -12,7 +13,6 @@ use App\User, App\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use GuzzleHttp\Client;
 
@@ -32,19 +32,21 @@ class UserController extends Controller
     {
         /* Specify the rules */
         $rules = array(
-            'name' => 'required|unique:users',
-            'password' => 'required',
+            'name'      =>  'required|unique:users',
+            'email'     =>  'required|unique:users',
+            'password'  =>  'required'
         );
 
-        $validator = Validator::make($request->all(), $rules);
+        $messages = array(
+            'email.required'    =>  "The 'username' is requried.",
+            'email.unique'      =>  "The 'username' has already been taken."
+        );
+
+        $validator = Validator::make($request->all(), $rules, $messages);
 
         /* Process the request */
         if($validator->fails()) {
-            return Response::json([
-                'response' => 'Failure',
-                'message' => 'There are required fields missing',
-                'errors' => $validator->errors()
-            ], 422);
+            return HttpResponse::missingFieldResponse($validator->errors());
 
         } else {
             $user = new User();
@@ -59,12 +61,7 @@ class UserController extends Controller
             dispatch(new MailNewUser($user->id));
         }
 
-        return Response::json([
-            'response'      =>  'Success',
-            'user_id'       =>  $user->id,
-            'message'       =>  'User successfully created',
-            'authorization' =>  ''
-        ]);
+        return HttpResponse::userCreationResponse($user->id);
     }
 
 
@@ -83,10 +80,7 @@ class UserController extends Controller
         /* Retrieves the selected user */
         $user = User::where('id', $user)->first();
         if ($user == null) {
-            return response()->json([
-                'response' => 'failure',
-                'message' => 'User not found',
-            ], 404);
+            return HttpResponse::userNotFoundResponse('User not found');
         }
 
         /* Creates a new report */
@@ -100,10 +94,7 @@ class UserController extends Controller
 
         dispatch(new MailReport($report->id));
 
-        return response()->json([
-            'response' => 'success',
-            'message' => 'User has been reported',
-        ]);
+        return HttpResponse::generalResponse('Success', 'User has been reported', 200);
     }
 
     /**
@@ -125,10 +116,7 @@ class UserController extends Controller
         $user->followers = $follower_count;
         $user->karma = $karma_count;
 
-        return response()->json([
-            'response' => 'success',
-            'user' => $user
-        ]);
+        return self::generalResponse('Success', $user, 200);
     }
 
     /**
@@ -153,7 +141,55 @@ class UserController extends Controller
      */
     public function update($user, Request $request)
     {
+        /* Retrieves the logged in user */
+        $user = User::find(Auth::user()->id);
 
+        if ($userID != $user->id) {
+            return HttpResponse::unauthorizedResponse();
+        }
+
+        $acceptedFields = [
+            'name',
+            'email',
+            'password',
+            'gender',
+            'first_name',
+            'last_name',
+            'city',
+            'prov_state',
+            'country',
+            'birthday',
+            'bio',
+            'radius',
+            'notification_key'
+        ];
+
+        foreach ($acceptedFields as $field) {
+            if ($request->input($field) != null) {
+
+                $value = $request->input($field);
+
+                if ($this->checkAlreadyExists('name', $value) && $value != $user->name) {
+                    return HttpResponse::duplicateEntryResponse('name', $value);
+                }
+
+                if ($this->checkAlreadyExists('email', $value) && $value != $user->email) {
+                    return HttpResponse::duplicateEntryResponse('email', $value);
+                }
+
+                $user->{$field} = $value;
+            }
+        }
+
+        $user->save();
+
+        /* Return success */
+        return HttpResponse::successDataResponse('Information successfully updated', $user);
+    }
+
+    private static function checkAlreadyExists($key, $value)
+    {
+        return User::where($key, $value)->first() != null;
     }
 
     /**
@@ -170,28 +206,21 @@ class UserController extends Controller
 
         /* Checks if the user exists  */
         if ($user == null) {
-            return response()->json([
-                'response' => 'Failure',
-                'message' => 'User not found'
-            ] , 404);
+            return HttpResponse::notFoundResponse('User not found');
         }
 
         else {
             /* Gets the current profile photo */
             $profilePicture = ProfilePicture::where('user_id', $user->id)->where('current', 1)->first();
 
-            /* If the photo exists */
-            if (Photo::photoExists('profile_uploads', $profilePicture->path)) {
-                $file = Photo::getPhoto('profile_uploads', $profilePicture->path);
-                return response($file)->header('Content-Type', $profilePicture->mime_type);
-
             /* If the photo does not exist */
-            } else {
-                return response()->json([
-                    'response' => 'Failure',
-                    'message' => 'User profile picture not found'
-                ], 404);
+            if ($profilePicture == null || !Photo::photoExists('profile_uploads', $profilePicture->path)) {
+                return HttpResponse::notFoundResponse('User profile picture not found');
             }
+
+            /* Photo does exist */
+            $file = Photo::getPhoto('profile_uploads', $profilePicture->path);
+            return response($file)->header('Content-Type', $profilePicture->mime_type);
         }
     }
 
@@ -202,24 +231,27 @@ class UserController extends Controller
      *
      * @return json Returns a success or failure message and the profile picture if successful.
      */
-    public function savePhoto(Request $request)
+    public function savePhoto($userID, Request $request)
     {
         $file = $request->file('photo');
+        $user = User::find(Auth::user()->id);
 
-        /* Check if file was given */
-        if ($file == null) {
-            return response()->json([
-                'response' => 'Failure',
-                'message' => "missing or invalid 'photo' parameter with attached file"
-            ], 422);
+
+        /* Specify the rules */
+        $rules = array(
+            'current' => 'required',
+            'photo' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+
+        /* Process the request */
+        if($validator->fails()) {
+            return HttpResponse::missingFieldResponse($validator->errors());
         }
 
-        /* Check for current parameter */
-        if ($request->input('current') == null) {
-            return response()->json([
-                'response' => 'Failure',
-                'message' => "missing or invalid 'current' parameter"
-            ], 422);
+        if ($userID != $user->id) {
+            return HttpResponse::unauthorizedResponse();
         }
 
         /* Update old profile picture current status */
@@ -241,11 +273,7 @@ class UserController extends Controller
         $profile_picture->save();
 
         /* Return success */
-        return response()->json([
-            'response' => 'Success',
-            'message' => 'Profile pictures successfully added',
-            'data' => $profile_picture
-        ]);
+        return HttpResponse::successDataResponse('Profile pictures successfully added', $profile_picture);
     }
 
     /**
@@ -270,10 +298,9 @@ class UserController extends Controller
             ],
         ]);
 
-        return response()->json([
-            'response' => 'success',
-            'token' => json_decode((string) $response->getBody(), true),
-            'user' => User::where('email', $request->input('username'))->first(),
-        ]);
+        return HttpResponse::authorizationResponse(
+            json_decode((string) $response->getBody(), true),
+            User::where('email', $request->input('username'))->first()
+        );
     }
 }
