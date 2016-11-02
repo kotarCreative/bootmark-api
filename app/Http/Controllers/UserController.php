@@ -177,6 +177,10 @@ class UserController extends Controller
                     return HttpResponse::duplicateEntryResponse('email', $value);
                 }
 
+                if ($field == 'password') {
+                    $value = Hash::make($value);
+                }
+
                 $user->{$field} = $value;
             }
         }
