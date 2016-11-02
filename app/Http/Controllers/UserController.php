@@ -24,9 +24,9 @@ class UserController extends Controller
      * Checks the new users information and creates a new user
      * if the email and username havent been taken.
      *
-     * @param Illuminate\Http\Request $request The post request.
+     * @param Request $request The post request.
      *
-     * @return json A Json response.
+     * @return HttpResponse mixed
      */
     public function store(Request $request)
     {
@@ -69,9 +69,9 @@ class UserController extends Controller
      * Generates a report for the specified user
      *
      * @param int $userID The user that is being reported.
-     * @param Illuminate\Http\Request $request The request object containing all the inputs.
+     * @param Request $request The request object containing all the inputs.
      *
-     * @return Returns a success message or a failure message.
+     * @return HttpResponse Return a success message or a failure message.
      */
     public function report($user, Request $request)
     {
@@ -102,7 +102,7 @@ class UserController extends Controller
      *
      * @param Integer $userID users id that is passed during the api call e.g. .../users/{userID} 
      * 
-     * @return mixed Returns a json array of the user info.
+     * @return HttpResponse Return a general message response
      */
     public function show($user)
     {
@@ -116,7 +116,7 @@ class UserController extends Controller
         $user->followers = $follower_count;
         $user->karma = $karma_count;
 
-        return self::generalResponse('Success', $user, 200);
+        return HttpResponse::generalResponse('Success', $user, 200);
     }
 
     /**
@@ -124,7 +124,7 @@ class UserController extends Controller
      *
      * @param int $userID The user id to be deleted.
      *
-     * @return json Returns a success or failure message.
+     * @return HttpResponse mixed
      */
     public function destroy($user)
     {
@@ -135,9 +135,9 @@ class UserController extends Controller
      * Updates an existing user.
      *
      * @param int $userID The user id to be updated.
-     * @param Illuminate\Http\Request $request The Request object with all the inputs.
+     * @param Request $request The Request object with all the inputs.
      *
-     * @return json Returns a success or failure message.
+     * @return HttpResponse mixed
      */
     public function update($user, Request $request)
     {
@@ -187,6 +187,14 @@ class UserController extends Controller
         return HttpResponse::successDataResponse('Information successfully updated', $user);
     }
 
+    /**
+     * Checks the database to see if there exists a User who has the specified key:value pairing
+     *
+     * @param string $key Column in the users table
+     * @param string $value Value associated with the column
+     *
+     * @return bool Returns true if there is already a user with the associate key:value pairing
+     */
     private static function checkAlreadyExists($key, $value)
     {
         return User::where($key, $value)->first() != null;
@@ -227,9 +235,9 @@ class UserController extends Controller
     /**
      * Processes an http request and will store a profile photo on the server for the user.
      *
-     * @param Illuminate\Http\Request $request The request object containing all the inputs.
+     * @param Request $request The request object containing all the inputs.
      *
-     * @return json Returns a success or failure message and the profile picture if successful.
+     * @return HttpResponse mixed
      */
     public function savePhoto($userID, Request $request)
     {
@@ -279,9 +287,9 @@ class UserController extends Controller
     /**
      * Authorizes a user using passport oauth and will return a token.
      *
-     * @param Illuminate\Http\Request $request The request object containing all the inputs.
+     * @param Request $request The request object containing all the inputs.
      *
-     * @return mixed Returns a json response with a token and user info
+     * @return HttpResponse Returns a response with a token and user info
      */
     public function auth(Request $request)
     {
