@@ -117,7 +117,7 @@ class UserController extends Controller
     {
         $user = User::find($userID);
 
-        $bootmarkCount = Bootmark::where("id", $userID)->count();
+        $bootmarkCount = Bootmark::where("user_id", $userID)->count();
         $followerCount = Follower::where("user_id", $userID)->count();
         $followingCount = Follower::where("follower_id", $userID)->count();
 
