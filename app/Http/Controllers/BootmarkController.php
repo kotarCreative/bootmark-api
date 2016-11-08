@@ -94,8 +94,8 @@ class BootmarkController extends Controller
         /* Get a count of comments made on each bootmark being returned. */
         foreach($bootmarks as $bootmark) {
             $temp = Bootmark::find($bootmark->id);
-            $commentCount = $temp->comments()->count();
-            $bootmark->comments = $commentCount;
+            $comment_count = $temp->comments()->count();
+            $bootmark->comments = $comment_count;
         }
 
         return response()->json([
@@ -256,9 +256,9 @@ class BootmarkController extends Controller
         $vote = $request->input('vote');
         if($this->hasVoted($user_id,$bootmarks)) {
             /* Check if the user is reversing their vote. */
-            $oldVote = Vote::where('user_id', $user_id)->where('bootmark_id', $bootmarks)->first();
-            if($oldVote->vote == $vote) {
-                $oldVote->delete();
+            $old_vote = Vote::where('user_id', $user_id)->where('bootmark_id', $bootmarks)->first();
+            if($old_vote->vote == $vote) {
+                $old_vote->delete();
                 if($vote == 0) {
                     $this->updateKarma($bootmark, 1);
                 } else {
@@ -269,8 +269,8 @@ class BootmarkController extends Controller
                     'message' => 'Bootmark was unvoted',
                 ]);
             } else {
-                $oldVote->vote = $vote;
-                $oldVote->save();
+                $old_vote->vote = $vote;
+                $old_vote->save();
 
                 $this->updateKarma($bootmark, $vote);
                 $this->updateKarma($bootmark, $vote);
@@ -462,21 +462,21 @@ class BootmarkController extends Controller
      */
     private function createYouTubePath($url)
     {
-        $videoID = '';
+        $video_id = '';
 
         if (preg_match('/youtube\.com\/watch\?v=([^\&\?\/]+)/', $url, $id)) {
-            $videoID = $id[1];
+            $video_id = $id[1];
         } else if (preg_match('/youtube\.com\/embed\/([^\&\?\/]+)/', $url, $id)) {
-            $videoID = $id[1];
+            $video_id = $id[1];
         } else if (preg_match('/youtube\.com\/v\/([^\&\?\/]+)/', $url, $id)) {
-            $videoID = $id[1];
+            $video_id = $id[1];
         } else if (preg_match('/youtu\.be\/([^\&\?\/]+)/', $url, $id)) {
-            $videoID = $id[1];
+            $video_id = $id[1];
         } else if (preg_match('/youtube\.com\/verify_age\?next_url=\/watch%3Fv%3D([^\&\?\/]+)/', $url, $id)) {
-            $videoID = $id[1];
+            $video_id = $id[1];
         }
 
-        return 'https://youtube.com/embed/'.$videoID;
+        return 'https://youtube.com/embed/' . $video_id;
     }
 
     /**
