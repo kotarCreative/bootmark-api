@@ -210,12 +210,12 @@ class BootmarkController extends Controller
      *
      * @return Returns a success message or a failure message.
      */
-    public function report($bootmarkID, Request $request)
+    public function report($bootmark, Request $request)
     {
         $reporter_id = Auth::user()->id;
 
         /* Retrieves the selected bootmark */
-        $bootmark = Bootmark::where('id', $bootmarkID)->first();
+        $bootmark = Bootmark::where('id', $bootmark)->first();
         if ($bootmark == null) {
             return response()->json([
                 'response' => 'failure',
@@ -226,7 +226,7 @@ class BootmarkController extends Controller
         /* Creates a new report */
         $report = new Report;
         $report->reporter_id = $reporter_id;
-        $report->bootmark_id = $bootmarkID;
+        $report->bootmark_id = $bootmark->id;
         $report->message = $request->input('message');
         $report->status = "Report received";
 
@@ -247,16 +247,16 @@ class BootmarkController extends Controller
      *
      * @return Returns a success message or a failure message.
      */
-    public function vote($bootmarks, Request $request)
+    public function vote($bootmark, Request $request)
     {
         $user_id = Auth::user()->id;
-        $bootmark = Bootmark::find($bootmarks);
+        $bootmark = Bootmark::find($bootmark);
 
         /* 1 for upvote, 0 for downvote */
         $vote = $request->input('vote');
-        if($this->hasVoted($user_id,$bootmarks)) {
+        if($this->hasVoted($user_id,$bootmark->id)) {
             /* Check if the user is reversing their vote. */
-            $old_vote = Vote::where('user_id', $user_id)->where('bootmark_id', $bootmarks)->first();
+            $old_vote = Vote::where('user_id', $user_id)->where('bootmark_id', $bootmark->id)->first();
             if($old_vote->vote == $vote) {
                 $old_vote->delete();
                 if($vote == 0) {
@@ -283,7 +283,7 @@ class BootmarkController extends Controller
         } else {
             $new_vote = new Vote;
             $new_vote->user_id = $user_id;
-            $new_vote->bootmark_id = $bootmarks;
+            $new_vote->bootmark_id = $bootmark->id;
             $new_vote->vote = $vote;
             $new_vote->save();
 

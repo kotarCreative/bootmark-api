@@ -76,12 +76,12 @@ class UserController extends Controller
      *
      * @return Returns a success message or a failure message.
      */
-    public function report($userID, Request $request)
+    public function report($user, Request $request)
     {
         $reporter_id = Auth::user()->id;
 
         /* Retrieves the selected user */
-        $user = User::where('id', $userID)->first();
+        $user = User::where('id', $user)->first();
         if ($user == null) {
             return response()->json([
                 'response' => 'failure',
@@ -92,7 +92,7 @@ class UserController extends Controller
         /* Creates a new report */
         $report = new Report;
         $report->reporter_id = $reporter_id;
-        $report->user_id = $userID;
+        $report->user_id = $user->id;
         $report->message = $request->input('message');
         $report->status = "Report received";
 
@@ -138,7 +138,7 @@ class UserController extends Controller
      *
      * @return json Returns a success or failure message.
      */
-    public function destroy($userID)
+    public function destroy($user)
     {
 
     }

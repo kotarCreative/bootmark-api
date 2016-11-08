@@ -20,17 +20,17 @@ Route::group(['prefix' => 'v1'], function() {
 
 Route::group(['prefix' => 'v1', 'middleware' => 'auth:api'], function () {
     /* Bootmark Requests */
-    Route::get('bootmarks/{bootmarkID}/photo', 'BootmarkController@getPhoto');
-    Route::post('bootmarks/{bootmarks}/vote','BootmarkController@vote');
-    Route::post('bootmarks/{bootmarkID}/report','BootmarkController@report');
+    Route::get('bootmarks/{bootmark}/photo', 'BootmarkController@getPhoto');
+    Route::post('bootmarks/{bootmark}/vote','BootmarkController@vote');
+    Route::post('bootmarks/{bootmark}/report','BootmarkController@report');
     Route::resource('bootmarks', 'BootmarkController', ['except' => ['create', 'show', 'edit']]);
 
     /* Comment Requests */
-    Route::post('comments/{commentID}/report','CommentController@report');
+    Route::post('comments/{comment}/report','CommentController@report');
 
     /* User Requests */
     Route::resource('users', 'UserController', ['only' => ['show', 'update', 'destroy']]);
-    Route::get('users/{userID}/photo', 'UserController@getPhoto');
-    Route::post('users/{userID}/photo', 'UserController@savePhoto');
-    Route::post('users/{userID}/report','UserController@report');
+    Route::get('users/{user}/photo', 'UserController@getPhoto');
+    Route::post('users/{user}/photo', 'UserController@savePhoto');
+    Route::post('users/{user}/report','UserController@report');
 });
