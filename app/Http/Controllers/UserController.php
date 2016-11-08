@@ -113,17 +113,17 @@ class UserController extends Controller
      * 
      * @return mixed Returns a json array of the user info.
      */
-    public function show($userID)
+    public function show($user)
     {
-        $user = User::find($userID);
+        $user = User::find($user);
 
-        $bootmarkCount = Bootmark::where("user_id", $userID)->count();
-        $followerCount = Follower::where("user_id", $userID)->count();
-        $followingCount = Follower::where("follower_id", $userID)->count();
+        $bootmark_count = Bootmark::where("user_id", $user->id)->count();
+        $follower_count = Follower::where("user_id", $user->id)->count();
+        $karma_count = Bootmark::where("user_id", $user->id)->sum('karma');
 
-        $user->bootmarks = $bootmarkCount;
-        $user->followers = $followerCount;
-        $user->following = $followingCount;
+        $user->bootmarks = $bootmark_count;
+        $user->followers = $follower_count;
+        $user->karma = $karma_count;
 
         return response()->json([
             'response' => 'success',
