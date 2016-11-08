@@ -151,7 +151,7 @@ class UserController extends Controller
      *
      * @return json Returns a success or failure message.
      */
-    public function update($userID, Request $request)
+    public function update($user, Request $request)
     {
 
     }
@@ -163,10 +163,10 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse showing error or the photo being retrieved.
      */
-    public function getPhoto($userID)
+    public function getPhoto($user)
     {
         /* Retrieves the selected user */
-        $user = User::where('id', $userID)->first();
+        $user = User::where('id', $user)->first();
 
         /* Checks if the user exists  */
         if ($user == null) {
@@ -178,7 +178,7 @@ class UserController extends Controller
 
         else {
             /* Gets the current profile photo */
-            $profilePicture = ProfilePicture::where('user_id', $userID)->where('current', 1)->first();
+            $profilePicture = ProfilePicture::where('user_id', $user->id)->where('current', 1)->first();
 
             /* If the photo exists */
             if (Photo::photoExists('profile_uploads', $profilePicture->path)) {
@@ -224,27 +224,27 @@ class UserController extends Controller
 
         /* Update old profile picture current status */
         if ($request->input('current') == 1) {
-            $currentPicture = ProfilePicture::where('user_id', Auth::user()->id)->where('current', 1)->first();
-	    if ($currentPicture != null) {
-                $currentPicture->current = 0;
-                $currentPicture->save();
+            $current_picture = ProfilePicture::where('user_id', Auth::user()->id)->where('current', 1)->first();
+	    if ($current_picture != null) {
+                $current_picture->current = 0;
+                $current_picture->save();
 	    }
         }
 
-        $profilePicture = new ProfilePicture;
+        $profile_picture = new ProfilePicture();
 
-        $profilePicture->user_id = Auth::user()->id;
-        $profilePicture->path = Photo::storePhoto('profile_uploads', $file);
-        $profilePicture->mime_type = $file->getClientMimeType();
-        $profilePicture->current = $request->input('current');
+        $profile_picture->user_id = Auth::user()->id;
+        $profile_picture->path = Photo::storePhoto('profile_uploads', $file);
+        $profile_picture->mime_type = $file->getClientMimeType();
+        $profile_picture->current = $request->input('current');
 
-        $profilePicture->save();
+        $profile_picture->save();
 
         /* Return success */
         return response()->json([
             'response' => 'Success',
             'message' => 'Profile pictures successfully added',
-            'data' => $profilePicture
+            'data' => $profile_picture
         ]);
     }
 
