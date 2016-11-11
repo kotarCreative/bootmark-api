@@ -68,7 +68,7 @@ class UserController extends Controller
     /**
      * Generates a report for the specified user
      *
-     * @param int $userID The user that is being reported.
+     * @param int $user The user that is being reported.
      * @param Request $request The request object containing all the inputs.
      *
      * @return HttpResponse Return a success message or a failure message.
@@ -100,7 +100,7 @@ class UserController extends Controller
     /**
      * Returns the specified user information with the total bootmark count, followers count and following count.
      *
-     * @param Integer $userID users id that is passed during the api call e.g. .../users/{userID} 
+     * @param Integer $user users id that is passed during the api call e.g. .../users/{userID}
      * 
      * @return HttpResponse Return a general message response
      */
@@ -122,7 +122,7 @@ class UserController extends Controller
     /**
      * Soft deletes a user and all its activity from the database.
      *
-     * @param int $userID The user id to be deleted.
+     * @param int $user The user id to be deleted.
      *
      * @return HttpResponse mixed
      */
@@ -134,17 +134,18 @@ class UserController extends Controller
     /**
      * Updates an existing user.
      *
-     * @param int $userID The user id to be updated.
+     * @param int $user The user id to be updated.
      * @param Request $request The Request object with all the inputs.
      *
      * @return HttpResponse mixed
      */
     public function update($user, Request $request)
     {
+        $id = $user;
         /* Retrieves the logged in user */
         $user = User::find(Auth::user()->id);
 
-        if ($userID != $user->id) {
+        if ($id != $user->id) {
             return HttpResponse::unauthorizedResponse();
         }
 
@@ -243,9 +244,10 @@ class UserController extends Controller
      *
      * @return HttpResponse mixed
      */
-    public function savePhoto($userID, Request $request)
+    public function savePhoto($user, Request $request)
     {
         $file = $request->file('photo');
+        $id = $user;
         $user = User::find(Auth::user()->id);
 
 
@@ -262,7 +264,7 @@ class UserController extends Controller
             return HttpResponse::missingFieldResponse($validator->errors());
         }
 
-        if ($userID != $user->id) {
+        if ($id != $user->id) {
             return HttpResponse::unauthorizedResponse();
         }
 
