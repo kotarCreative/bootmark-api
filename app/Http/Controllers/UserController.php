@@ -76,6 +76,7 @@ class UserController extends Controller
     public function report($user, Request $request)
     {
         $reporter_id = Auth::user()->id;
+        $enums = ['spam', 'inappropriate', 'other'];
 
         /* Retrieves the selected user */
         $user = User::where('id', $user)->first();
@@ -89,6 +90,9 @@ class UserController extends Controller
         $report->user_id = $user->id;
         $report->message = $request->input('message');
         $report->status = "Report received";
+        if (in_array($request->input('reason'), $enums)) {
+            $report->reason = $request->input('reason');
+        }
 
         $report->save();
 

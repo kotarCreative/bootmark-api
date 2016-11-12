@@ -201,7 +201,8 @@ class BootmarkController extends Controller
     public function report($bootmark, Request $request)
     {
         $reporter_id = Auth::user()->id;
-
+        $enums = ['spam', 'inappropriate', 'other'];
+        
         /* Retrieves the selected bootmark */
         $bootmark = Bootmark::where('id', $bootmark)->first();
         if ($bootmark == null) {
@@ -217,6 +218,9 @@ class BootmarkController extends Controller
         $report->bootmark_id = $bootmark->id;
         $report->message = $request->input('message');
         $report->status = "Report received";
+        if (in_array($request->input('reason'), $enums)) {
+            $report->reason = $request->input('reason');
+        }
 
         $report->save();
 
