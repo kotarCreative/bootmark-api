@@ -14,7 +14,7 @@ class AddReportSpamInappropriate extends Migration
     public function up()
     {
         Schema::table('reports', function($table) {
-            $table->enum('reason', ['spam', 'inappropriate', 'other'])->nullable();
+            $table->string('reason')->nullable();
             $table->string('message')->nullable()->change();
         });
     }

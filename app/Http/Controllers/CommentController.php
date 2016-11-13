@@ -82,7 +82,6 @@ class CommentController extends Controller
     public function report($comment, Request $request)
     {
         $reporter_id = Auth::user()->id;
-        $enums = ['spam', 'inappropriate', 'other'];
 
         /* Retrieves the selected comment */
         $comment = Comment::where('id', $comment)->first();
@@ -99,9 +98,7 @@ class CommentController extends Controller
         $report->comment_id = $comment->id;
         $report->message = $request->input('message');
         $report->status = "Report received";
-        if (in_array($request->input('reason'), $enums)) {
-            $report->reason = $request->input('reason');
-        }
+        $report->reason = $request->input('reason');
 
         $report->save();
 
