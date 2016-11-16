@@ -33,13 +33,13 @@ class UserController extends Controller
         /* Specify the rules */
         $rules = array(
             'name'      =>  'required|unique:users',
-            'email'     =>  'required|unique:users',
+            'username'     =>  'required|unique:users,email',
             'password'  =>  'required'
         );
 
         $messages = array(
-            'email.required'    =>  "The 'username' is requried.",
-            'email.unique'      =>  "The 'username' has already been taken."
+            'username.required'    =>  "The email is requried.",
+            'username.unique'      =>  "The email has already been taken."
         );
 
         $validator = Validator::make($request->all(), $rules, $messages);
