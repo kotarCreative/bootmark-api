@@ -18,7 +18,7 @@ class BootmarkController extends Controller
     /**
     * Returns all the bootmarks based on the filters passed.
     *
-    * @param request $request The request object containing all the inputs.
+    * @param Request $request The request object containing all the inputs.
     *
     * @return mixed Returns a json array of all bootmarks.
     */
@@ -95,7 +95,7 @@ class BootmarkController extends Controller
     /**
      * Stores a new bootmark in the database.
      *
-     * @param request $request The request object with all the inputs.
+     * @param Request $request The request object with all the inputs.
      *
      * @return json Returns a success or failure message and the bootmark id if successful.
      */
@@ -194,7 +194,7 @@ class BootmarkController extends Controller
      * Generates a report for the specified bootmark
      *
      * @param int $bootmarkID The bootmark that is being report.
-     * @param request $request The request object containing all the inputs.
+     * @param Request $request The request object containing all the inputs.
      *
      * @return Returns a success message or a failure message.
      */
@@ -232,6 +232,7 @@ class BootmarkController extends Controller
      * Lets the user vote on a specific bootmark.
      *
      * @param int $bootmarks The bootmark that is being voted on.
+     * @param Request $request The request object.
      *
      * @return Returns a success message or a failure message.
      */

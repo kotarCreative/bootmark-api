@@ -27,6 +27,8 @@ Route::group(['prefix' => 'v1', 'middleware' => 'auth:api'], function () {
 
     /* Comment Requests */
     Route::post('comments/{comment}/report','CommentController@report');
+    Route::post('bootmarks/{bootmark}/comment', 'CommentController@store');
+    Route::get('bootmarks/{bootmark}/comment', 'CommentController@index');
 
     /* User Requests */
     Route::resource('users', 'UserController', ['only' => ['show', 'update', 'destroy']]);
