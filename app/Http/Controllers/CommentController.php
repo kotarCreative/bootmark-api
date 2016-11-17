@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\HttpResponse;
 use App\Jobs\MailReport;
 use Illuminate\Http\Request;
 
@@ -83,13 +84,16 @@ class CommentController extends Controller
     {
         $reporter_id = Auth::user()->id;
 
+        $enums = Report::getEnums();
+
         /* Retrieves the selected comment */
         $comment = Comment::where('id', $comment)->first();
         if ($comment == null) {
-            return response()->json([
-                'response' => 'failure',
-                'message' => 'Comment not found',
-            ], 404);
+            return HttpResponse::notFoundResponse('Comment not found');
+        }
+
+        if (!in_array($request->input('reason'), $enums)) {
+            return HttpResponse::generalResponse('Failure', "Reason must be either 'spam' or 'inappropriate'", 422);
         }
 
         /* Creates a new report */
@@ -104,9 +108,6 @@ class CommentController extends Controller
 
         dispatch(new MailReport($report->id));
 
-        return response()->json([
-            'response' => 'success',
-            'message' => 'Comment has been reported'
-        ]);
+        return HttpResponse::successResponse('Comment has been reported');
     }
 }

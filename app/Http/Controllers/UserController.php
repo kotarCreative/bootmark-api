@@ -77,10 +77,16 @@ class UserController extends Controller
     {
         $reporter_id = Auth::user()->id;
 
+        $enums = Report::getEnums();
+
         /* Retrieves the selected user */
         $user = User::where('id', $user)->first();
         if ($user == null) {
-            return HttpResponse::userNotFoundResponse('User not found');
+            return HttpResponse::notFoundResponse('User not found');
+        }
+
+        if (!in_array($request->input('reason'), $enums)) {
+            return HttpResponse::generalResponse('Failure', "Reason must be either 'spam' or 'inappropriate'", 422);
         }
 
         /* Creates a new report */
@@ -95,7 +101,7 @@ class UserController extends Controller
 
         dispatch(new MailReport($report->id));
 
-        return HttpResponse::generalResponse('Success', 'User has been reported', 200);
+        return HttpResponse::successResponse('User has been reported');
     }
 
     /**

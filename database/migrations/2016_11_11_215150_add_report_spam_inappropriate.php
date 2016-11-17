@@ -14,7 +14,7 @@ class AddReportSpamInappropriate extends Migration
     public function up()
     {
         Schema::table('reports', function($table) {
-            $table->string('reason')->nullable();
+            $table->enum('reason', ['spam', 'inappropriate']);
             $table->string('message')->nullable()->change();
         });
     }
@@ -27,7 +27,7 @@ class AddReportSpamInappropriate extends Migration
     public function down()
     {
         Schema::table('reports', function($table) {
-            $table->dropColumn('reason');
+            DB::statement('ALTER TABLE reports DROP COLUMN reason');
             $table->string('message')->change();
         });
     }
