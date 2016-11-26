@@ -149,7 +149,7 @@ class UserController extends Controller
             return HttpResponse::unauthorizedResponse();
         }
 
-        $acceptedFields = [
+        $accepted_fields = [
             'name',
             'email',
             'password',
@@ -165,7 +165,7 @@ class UserController extends Controller
             'notification_key'
         ];
 
-        foreach ($acceptedFields as $field) {
+        foreach ($accepted_fields as $field) {
             if ($request->input($field) != null) {
 
                 $value = $request->input($field);
@@ -224,16 +224,16 @@ class UserController extends Controller
 
         else {
             /* Gets the current profile photo */
-            $profilePicture = ProfilePicture::where('user_id', $user->id)->where('current', 1)->first();
+            $profile_picture = ProfilePicture::where('user_id', $user->id)->where('current', 1)->first();
 
             /* If the photo does not exist */
-            if ($profilePicture == null || !Photo::photoExists('profile_uploads', $profilePicture->path)) {
+            if ($profile_picture == null || !Photo::photoExists('profile_uploads', $profile_picture->path)) {
                 return HttpResponse::notFoundResponse('User profile picture not found');
             }
 
             /* Photo does exist */
-            $file = Photo::getPhoto('profile_uploads', $profilePicture->path);
-            return response($file)->header('Content-Type', $profilePicture->mime_type);
+            $file = Photo::getPhoto('profile_uploads', $profile_picture->path);
+            return response($file)->header('Content-Type', $profile_picture->mime_type);
         }
     }
 
