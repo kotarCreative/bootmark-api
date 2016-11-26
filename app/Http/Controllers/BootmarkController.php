@@ -50,32 +50,13 @@ class BootmarkController extends Controller
             $bootmarks = $bootmarks->where('discoverable', false);
         }
 
-        $filters = $this->getFilters($request);
-
-        /* Applies all the type filters */
-        $bootmarks = $bootmarks->whereNotIn('type',$filters);
-
-        /* Applies the friends filter or defaults to all users */
-        if($request->has('friends') && $request->input('friends') == 1) {
-            $friends = $this->findFriends($user_id);
-
-            /* Join the user ids to the bootmarks table for just friends bootmarks */
-            $bootmarks = $bootmarks->join('users','bootmarks.user_id','=','users.id')->whereIn('bootmarks.user_id', $friends);
-        } else {
-            $bootmarks = $bootmarks->join('users','bootmarks.user_id','=','users.id');
-        }
-
-        /* Applies the popular filter or defaults to the newest filter */
-        if($request->has('popular') && $request->input('popular') == 1) {
-
+        /* Applies the filter that has been selected */
+        if($request->input('filter') == 'closest') {
+            $bootmarks = $bootmarks->whereRaw("earth_box(ll_to_earth($lat,$lng), $rad) @> ll_to_earth(lat, lng)");
+        } else if($request->input('filter') == 'popular') {
             $bootmarks = $bootmarks->orderBy('karma','desc');
         } else {
             $bootmarks = $bootmarks->orderBy('bootmarks.created_at','desc');
-        }
-
-        /* Applies the local filter or defaults to the global filter */
-        if($request->has('local') && $request->input('local') == 1) {
-            $bootmarks = $bootmarks->whereRaw("earth_box(ll_to_earth($lat,$lng), $rad) @> ll_to_earth(lat, lng)");
         }
 
         /* Select required data and paginate results */
