@@ -59,6 +59,8 @@ class BootmarkController extends Controller
             $bootmarks = $bootmarks->orderBy('bootmarks.created_at','desc');
         }
 
+        $bootmarks = $bootmarks->join('users','bootmarks.user_id','=','users.id');
+
         /* Select required data and paginate results */
         $bootmarks = $bootmarks->select(
                      'users.name',
