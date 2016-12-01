@@ -67,7 +67,7 @@ class BootmarkController extends Controller
 
         /* Select required data and paginate results */
         $bootmarks = $bootmarks->select(
-                     $distance_select,
+                     DB::raw($distance_select),
                      'users.name',
                      'bootmarks.*',
                      'links.url',
