@@ -20,17 +20,24 @@ class CommentController extends Controller
     public function index($bootmark)
     {
         $bootmark = Bootmark::find($bootmark);
-        $comments = $bootmark->comments;
+        if($bootmark) {
+            $comments = $bootmark->comments;
 
-        foreach($comments as $comment) {
-            $user = User::find($comment->user_id);
-            $comment->username = $user->name;
+            foreach($comments as $comment) {
+                $user = User::find($comment->user_id);
+                $comment->username = $user->name;
+            }
+
+            return response()->json([
+                'reponse' => 'success',
+                'comments' => $comments
+            ]);
+        } else {
+            return response()->json([
+                'response' => 'failure',
+                'message' => 'The bootmark requested does not exist'
+            ], 422);
         }
-
-        return response()->json([
-            'status' => 200,
-            'comments' => $comments
-        ]);
     }
 
     /**
