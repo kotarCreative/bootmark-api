@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Jobs\MailReport;
 use Illuminate\Http\Request;
 
-use App\Comment, App\Report, App\Bootmark;
+use App\Comment, App\Report, App\Bootmark, App\User;
 use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
