@@ -54,16 +54,19 @@ class CommentController extends Controller
             'comment' => 'required'
         ]);
 
+        $user = Auth::user();
         $bootmark = Bootmark::find($bootmark);
         $comment = new Comment();
-        $comment->user_id = Auth::user()->id;
+        $comment->user_id = $user->id;
         $comment->comment = $request->input('comment');
 
         $bootmark->comments()->save($comment);
 
         return response()->json([
             'status' => 200,
-            'message' => 'The bootmark has been commented on.'
+            'message' => 'The bootmark has been commented on.',
+            'user_id' => $user->id,
+            'username' => $user->name
         ]);
     }
 
@@ -102,9 +105,7 @@ class CommentController extends Controller
 
         return response()->json([
             'response' => 'success',
-            'message' => 'Comment has been reported',
-            'user_id' => $user->id,
-            'username' => $user->name
+            'message' => 'Comment has been reported'
         ]);
     }
 }
