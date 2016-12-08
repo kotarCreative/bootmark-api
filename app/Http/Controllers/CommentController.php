@@ -59,7 +59,7 @@ class CommentController extends Controller
         $comment->user_id = Auth::user()->id;
         $comment->comment = $request->input('comment');
 
-        $bootmark->comments->save($comment);
+        $bootmark->comments()->save($comment);
 
         return response()->json([
             'status' => 200,
