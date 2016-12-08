@@ -1,55 +1,22 @@
-<head>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html">
     <link href='https://fonts.googleapis.com/css?family=Lato:600,800' rel='stylesheet' type='text/css'>
-</head>
-<style>
-        h1 {
-            font-family:        Lato, Open, Sans, serif;
-            font-weight:        800
-        }
-
-        h3 {
-            font-family:        Lato, Open, Sans, serif;
-            font-weight:        600;
-        }
-
-        .sig-div {
-            display:            inline;
-        }
-
-        #sig-list {
-            display:            inline-block;
-            margin:             0;
-            padding:            0;
-            list-style-type:    none;
-        }
-
-        .sig-list-item {
-            margin:             0;
-        }
-
-        #wordmark-image {
-            width:              120px !important;
-            height:             30px !important;
-        }
-
-        #logo-image {
-            width:              60px !important;
-            height:             60px !important;
-            border-right:       thin solid #333;
-        }
-
-        #url-link {
-            text-decoration:    none;
-            color:              #333;
-            margin-left:        4px;
-        }
-
-        #url-link:hover {
-            cursor:             pointer;
-            color:              #00b3c6;
-        }
+  </head>
+  <style type="text/css">
+        h1{font-family:Lato, Open, Sans, serif;font-weight:800;}
+        h3{font-family:Lato, Open, Sans, serif;font-weight:600;}
+        .sig-div{display:inline;}
+        .sig-list{display:inline-block;margin:0;padding:0;list-style-type:none;}
+        .sig-list-item{margin:0;}
+        .wordmark-image{width:120px !important;height:30px !important;}
+        .logo-image{width:60px !important;height:60px !important;max-width:60px !important;max-height:60px !important;border-right:thin solid #333;}
+        .url-link{text-decoration:none;color:#333;margin-left:4px;}
+        .url-link:hover{cursor:pointer;color:#00b3c6;}
     </style>
-<body>
+  <body>
     <h1>Your report has been delivered</h1>
 
     <p>We appreciate your contribution to making Bootmark the very best it can be.</p>
@@ -68,16 +35,17 @@
     <p>Mike | Scott | Dave | Isaac | Cody</p>
 
     <div class="sig-div">
-        <img id="logo-image" src='{{ $message->embed(public_path() . '/img/tree-logo.png') }}'/>
+        <img class="logo-image" src='{{ $message->embed(public_path() . '/img/tree-logo.png') }}'/>
     </div>
     <div class="sig-div">
-        <ul id="sig-list">
+        <ul class="sig-list">
             <li class="sig-list-item">
-                <img id="wordmark-image" src='{{ $message->embed(public_path() . '/img/wordmark.png') }}'/>
+                <img class="wordmark-image" src='{{ $message->embed(public_path() . '/img/wordmark.png') }}'/>
             </li>
             <li class="sig-list-item">
-                <a href="www.bootmark.ca" id="url-link">www.bootmark.ca</a>
+                <a href="www.bootmark.ca" class="url-link">www.bootmark.ca</a>
             </li>
         </ul>
     </div><br/>
-</body>
+  </body>
+</html>

@@ -15,7 +15,7 @@
             display:            inline;
         }
 
-        #sig-list {
+        .sig-list {
             display:            inline-block;
             margin:             0;
             padding:            0;
@@ -26,24 +26,24 @@
             margin:             0;
         }
 
-        #wordmark-image {
+        .wordmark-image {
             width:              120px !important;
             height:             30px !important;
         }
 
-        #logo-image {
+        .logo-image {
             width:              60px !important;
             height:             60px !important;
             border-right:       thin solid #333;
         }
 
-        #url-link {
+        .url-link {
             text-decoration:    none;
             color:              #333;
             margin-left:        4px;
         }
 
-        #url-link:hover {
+        .url-link:hover {
             cursor:             pointer;
             color:              #00b3c6;
         }
@@ -87,15 +87,15 @@
     </p>
 
     <div class="sig-div">
-        <img id="logo-image" src='{{ $message->embed(public_path() . '/img/tree-logo.png') }}'/>
+        <img class="logo-image" src='{{ $message->embed(public_path() . '/img/tree-logo.png') }}'/>
     </div>
     <div class="sig-div">
-        <ul id="sig-list">
+        <ul class="sig-list">
             <li class="sig-list-item">
-                <img id="wordmark-image" src='{{ $message->embed(public_path() . '/img/wordmark.png') }}'/>
+                <img class="wordmark-image" src='{{ $message->embed(public_path() . '/img/wordmark.png') }}'/>
             </li>
             <li class="sig-list-item">
-                <a href="www.bootmark.ca" id="url-link">www.bootmark.ca</a>
+                <a href="www.bootmark.ca" class="url-link">www.bootmark.ca</a>
             </li>
         </ul>
     </div><br/>
