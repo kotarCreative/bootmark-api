@@ -6,15 +6,56 @@
     <link href='https://fonts.googleapis.com/css?family=Lato:600,800' rel='stylesheet' type='text/css'>
   </head>
   <style type="text/css">
-        h1{font-family:Lato, Open, Sans, serif;font-weight:800;}
-        h3{font-family:Lato, Open, Sans, serif;font-weight:600;}
-        .sig-div{display:inline;}
-        .sig-list{display:inline-block;margin:0;padding:0;list-style-type:none;}
-        .sig-list-item{margin:0;}
-        .wordmark-image{width:120px !important;height:30px !important;}
-        .logo-image{width:60px !important;height:60px !important;max-width:60px !important;max-height:60px !important;border-right:thin solid #333;}
-        .url-link{text-decoration:none;color:#333;margin-left:4px;}
-        .url-link:hover{cursor:pointer;color:#00b3c6;}
+        h1 {
+            font-family:        Lato, Open, Sans, serif;
+            font-weight:        800;
+        }
+
+        h3 {
+            font-family:        Lato, Open, Sans, serif;
+            font-weight:        600;
+        }
+
+        .sig-div {
+            display:            inline;
+        }
+
+        .sig-list {
+            display:            inline-block;
+            margin:             0;
+            padding:            0;
+            list-style-type:    none;
+        }
+
+        .sig-list-item {
+            margin:             0;
+        }
+
+        .wordmark-image {
+            width:              120px !important;
+            height:             30px !important;
+            max-width:          120px !important;
+            max-height:         30px !important;
+        }
+
+        .logo-image {
+            width:              60px !important;
+            height:             60px !important;
+            max-width:          60px !important;
+            max-height:         60px !important;
+            border-right:       thin solid #333;
+        }
+
+        .url-link {
+            text-decoration:    none;
+            color:              #333;
+            margin-left:        4px;
+        }
+
+        .url-link:hover {
+            cursor:             pointer;
+            color:              #00b3c6;
+        }
     </style>
   <body>
     <h1>Your report has been delivered</h1>

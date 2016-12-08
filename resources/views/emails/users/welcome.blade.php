@@ -29,11 +29,15 @@
         .wordmark-image {
             width:              120px !important;
             height:             30px !important;
+            max-width:          120px !important;
+            max-height:         30px !important;
         }
 
         .logo-image {
             width:              60px !important;
             height:             60px !important;
+            max-width:          60px !important;
+            max-height:         60px !important;
             border-right:       thin solid #333;
         }
 
