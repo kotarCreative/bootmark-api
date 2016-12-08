@@ -6,6 +6,10 @@ use Illuminate\Database\Migrations\Migration;
 
 class AddReportSpamInappropriate extends Migration
 {
+    public function __construct() {
+        DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
+    }
+
     /**
      * Run the migrations.
      *
@@ -27,7 +31,7 @@ class AddReportSpamInappropriate extends Migration
     public function down()
     {
         Schema::table('reports', function($table) {
-            DB::statement('ALTER TABLE reports DROP COLUMN reason');
+            $table->dropColumn('reason');
             $table->string('message')->change();
         });
     }
