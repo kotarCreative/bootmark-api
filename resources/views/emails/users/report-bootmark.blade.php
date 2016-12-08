@@ -28,13 +28,13 @@
         }
 
         #wordmark-image {
-            width:              120px;
-            height:             30px;
+            width:              120px !important;
+            height:             30px !important;
         }
 
         #logo-image {
-            width:              40px;
-            height:             40px;
+            width:              60px !important;
+            height:             60px !important;
             border-right:       thin solid #333;
         }
 
