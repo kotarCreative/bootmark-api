@@ -38,7 +38,7 @@ class UserController extends Controller
         );
 
         $messages = array(
-            'username.required'    =>  "The email is requried.",
+            'username.required'    =>  "The email is required.",
             'username.unique'      =>  "The email has already been taken."
         );
 
@@ -52,7 +52,7 @@ class UserController extends Controller
             $user = new User();
 
             $user->name = $request->input('name');
-            $user->email = $request->input('username');
+            $user->email = strtolower($request->input('username'));
             $user->password = Hash::make($request->input('password'));
             $user->radius = 2000;
 
@@ -306,7 +306,7 @@ class UserController extends Controller
                 'grant_type' => $request->input('grant_type'),
                 'client_id' => $request->input('client_id'),
                 'client_secret' => $request->input('client_secret'),
-                'username' => $request->input('username'),
+                'username' => strtolower($request->input('username')),
                 'password' => $request->input('password'),
                 'scope' => '',
             ],
