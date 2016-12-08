@@ -21,7 +21,7 @@ class CommentController extends Controller
     {
         $bootmark = Bootmark::find($bootmark);
         if($bootmark) {
-            $comments = $bootmark->comments;
+            $comments = $bootmark->comments()->orderBy('created_at', 'desc')->paginate(10);
 
             foreach($comments as $comment) {
                 $user = User::find($comment->user_id);
