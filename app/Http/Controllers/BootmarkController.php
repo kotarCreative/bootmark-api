@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\HttpResponse;
 use App\Jobs\MailReport;
 use App\Photo;
 use Illuminate\Http\Request;
@@ -202,13 +203,16 @@ class BootmarkController extends Controller
     {
         $reporter_id = Auth::user()->id;
 
+        $enums = Report::getEnums();
+
         /* Retrieves the selected bootmark */
         $bootmark = Bootmark::where('id', $bootmark)->first();
         if ($bootmark == null) {
-            return response()->json([
-                'response' => 'failure',
-                'message' => 'Bootmark not found',
-            ], 404);
+            return HttpResponse::notFoundResponse('Bootmark not found');
+        }
+
+        if (!in_array($request->input('reason'), $enums)) {
+            return HttpResponse::generalResponse('Failure', "Reason must be either 'spam' or 'inappropriate'", 422);
         }
 
         /* Creates a new report */
@@ -217,15 +221,13 @@ class BootmarkController extends Controller
         $report->bootmark_id = $bootmark->id;
         $report->message = $request->input('message');
         $report->status = "Report received";
+        $report->reason = $request->input('reason');
 
         $report->save();
 
         dispatch(new MailReport($report->id));
 
-        return response()->json([
-            'response' => 'success',
-            'message' => 'Bootmark has been reported',
-        ]);
+        return HttpResponse::successResponse('Bootmark has been reported');
     }
 
      /**

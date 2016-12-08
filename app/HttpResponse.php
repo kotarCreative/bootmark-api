@@ -56,6 +56,14 @@ class HttpResponse extends Model
         ]);
     }
 
+    public static function successResponse($message)
+    {
+        return response()->json([
+            'response' => 'Success',
+            'message' => $message
+        ]);
+    }
+
     public static function authorizationResponse($token, $user)
     {
         return response()->json([
