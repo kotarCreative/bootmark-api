@@ -77,7 +77,8 @@ class CommentController extends Controller
      */
     public function report($comment, Request $request)
     {
-        $reporter_id = Auth::user()->id;
+        $user = Auth::user();
+        $reporter_id = $user->id;
 
         /* Retrieves the selected comment */
         $comment = Comment::where('id', $comment)->first();
@@ -102,6 +103,8 @@ class CommentController extends Controller
         return response()->json([
             'response' => 'success',
             'message' => 'Comment has been reported',
+            'user_id' => $user->id,
+            'username' => $user->name
         ]);
     }
 }
