@@ -67,7 +67,7 @@ class CommentController extends Controller
             'message' => 'The bootmark has been commented on.',
             'user_id' => $user->id,
             'username' => $user->name,
-            'created_at' => $comment->created_at->toDateString()
+            'created_at' => $comment->created_at->toDateTimeString()
         ]);
     }
 
