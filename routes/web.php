@@ -11,4 +11,5 @@
 |
 */
 
-Route::get('/', 'WebsiteController@home');
+Auth::routes();
+Route::get('/password/success', 'Auth\PasswordSuccessController@index');
