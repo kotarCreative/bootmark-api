@@ -91,7 +91,7 @@
     </p>
 
     <div class="sig-div">
-        <img class="logo-image" src='{{ $message->embed(public_path() . '/img/tree-logo.png') }}'/>
+        <img class="logo-image" src='{{ $message->embed(public_path() . '/img/bootmark_logo.png') }}'/>
     </div>
     <div class="sig-div">
         <ul class="sig-list">
