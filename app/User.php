@@ -44,7 +44,7 @@ class User extends Authenticatable
     /**
      * Returns all the users that are following this user.
      *
-     * @return array Returns the array of followers.
+     * @return array Returns an array of App\Follower
      */
     public function followers()
     {
@@ -62,13 +62,12 @@ class User extends Authenticatable
     }
 
     /**
-     * Returns a user object if a user is following another user
+     * Returns all the users that the current user is following
      *
-     * @param int $user_id The id of the user to check for following status.
-     *
-     * @return App\User Returns a user object or null if not user is found
+     * @return array Returns an array of App\Follower
      */
-    public function scopeIsFollowing($query, $user_id) {
-        return $query->where('user_id', $user_id)->where('follower_id', $this->id);
+    public function following()
+    {
+        return $this->belongsToMany('App\Follower');
     }
 }
