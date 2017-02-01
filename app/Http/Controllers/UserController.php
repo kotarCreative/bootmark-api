@@ -118,6 +118,12 @@ class UserController extends Controller
         $bootmark_count = Bootmark::where("user_id", $user->id)->count();
         $follower_count = Follower::where("user_id", $user->id)->count();
         $karma_count = Bootmark::where("user_id", $user->id)->sum('karma');
+        $following = Auth::user()->isfollowing($user->id)->get();
+        if($following != null) {
+            $user->following = true;
+        } else {
+            $user->following = false;
+        }
 
         $user->bootmarks = $bootmark_count;
         $user->followers = $follower_count;

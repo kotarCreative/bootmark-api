@@ -60,4 +60,15 @@ class User extends Authenticatable
     {
         return $this->belongsTo('App\DiscoveredBootmark');
     }
+
+    /**
+     * Returns a user object if a user is following another user
+     *
+     * @param int $user_id The id of the user to check for following status.
+     *
+     * @return App\User Returns a user object or null if not user is found
+     */
+    public function scopeIsFollowing($query, $user_id) {
+        return $query->where('user_id', $user_id)->where('follower_id', $this->id);
+    }
 }
