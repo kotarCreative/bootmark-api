@@ -344,7 +344,7 @@ class UserController extends Controller
 
         if($user) {
             $following = Auth::user()->following()->where('user_id', $user->id)->first();
-            if(!$following->isEmpty()) {
+            if($following != null) {
                 $following->delete();
                 return response()->json([
                 'message' => 'User was successfully unfollowed',
