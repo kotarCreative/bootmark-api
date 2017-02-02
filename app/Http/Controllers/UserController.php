@@ -343,7 +343,7 @@ class UserController extends Controller
         $user = User::find($user);
 
         if($user) {
-            $following = Auth::user()->following()->where('user_id', $user->id)->first();
+            $following = Follower::where('user_id', $user->id)->where('follower_id', Auth::user()->id)->first();
             if($following != null) {
                 $following->delete();
                 return response()->json([
