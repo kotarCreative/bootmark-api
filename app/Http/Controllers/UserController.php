@@ -330,4 +330,36 @@ class UserController extends Controller
             User::where('email', $request->input('username'))->first()
         );
     }
+
+    /**
+     * Follows or unfollows a user depending on the current following status.
+     *
+     * @param int user_id The id of the user to change following status for.
+     *
+     * @return Response Returns a response with the new follower status.
+     */
+    public function follow($user)
+    {
+        $user = User::find($user);
+
+        if($user) {
+            $following = Auth::user()->following()->where('user_id', $user->id)->first();
+            if(!$following->isEmpty()) {
+                $following->delete();
+                return response()->json([
+                'message' => 'User was successfully unfollowed',
+                'following' => 'False'
+            ]);
+            } else {
+                $follower = new Follower;
+                $follower->user_id = $user->id;
+                $follower->follower_id = Auth::user()->id;
+                $follower->save();
+                return response()->json([
+                    'message' => 'User was successfully followed',
+                    'following' => 'True'
+                ]);
+            }
+        }
+    }
 }
