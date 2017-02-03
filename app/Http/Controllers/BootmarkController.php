@@ -52,9 +52,8 @@ class BootmarkController extends Controller
         }
 
         /* Applies the filter that has been selected */
-        $distance_select = '1';
+        $distance_select = "earth_distance(ll_to_earth($lat,$lng), ll_to_earth(lat, lng)) as distance_from_current";
         if($request->input('filter') == 'closest') {
-            $distance_select = "earth_distance(ll_to_earth($lat,$lng), ll_to_earth(lat, lng)) as distance_from_current";
             $bootmarks = $bootmarks->orderBy('distance_from_current', 'asc');
             /* Find bootmarks in a radius */
             //$bootmarks->whereRaw("earth_box(ll_to_earth($lat,$lng), $rad) @> ll_to_earth(lat, lng)");
