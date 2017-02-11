@@ -36,4 +36,5 @@ Route::group(['prefix' => 'v1', 'middleware' => 'auth:api'], function () {
     Route::post('users/{user}/photo', 'UserController@savePhoto');
     Route::post('users/{user}/report','UserController@report');
     Route::post('users/{user}/follow', 'UserController@follow');
+    Route::get('users/{user}/bootmarks', 'UserController@bootmarks');
 });

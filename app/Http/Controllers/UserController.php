@@ -334,7 +334,7 @@ class UserController extends Controller
     /**
      * Follows or unfollows a user depending on the current following status.
      *
-     * @param int user_id The id of the user to change following status for.
+     * @param int user The id of the user to change following status for.
      *
      * @return Response Returns a response with the new follower status.
      */
@@ -360,6 +360,62 @@ class UserController extends Controller
                     'following' => 'True'
                 ]);
             }
+        }
+    }
+
+    /**
+     * Retrieves all the bootmarks for a user sorted by time.
+     *
+     * @param int $user The id of the user to get bootmarks for.
+     * @param Request $request The request containing all the required fields
+     *
+     * @return Response Returns a response containing all the bootmarks for the user.
+     */
+    public function bootmarks($user, Request $request)
+    {
+        $this->validate($request,{
+            'lat' => 'required',
+            'lng' => 'required',
+        });
+
+        $user = User::find($user);
+
+        if($user) {
+            /* Create the join for media and links meta data */
+            $bootmarks = DB::table('bootmarks')
+                ->leftJoin('media','bootmarks.media_id','=','media.id')
+                ->leftJoin('links','bootmarks.link_id','=','links.id');
+
+            $bootmarks = $bootmarks
+                ->leftJoin(DB::raw("(select * from votes where votes.user_id = $user_id) v"),'bootmarks.id', '=', 'v.bootmark_id')
+                ->distinct();
+
+            $distance_select = "earth_distance(ll_to_earth($lat,$lng), ll_to_earth(lat, lng)) as distance_from_current";
+            $bootmarks->orderBy('bootmarks.created_at','desc');
+
+            /* Select required data and paginate results */
+            $bootmarks = $bootmarks->select(
+                DB::raw($distance_select),
+                'users.name',
+                'bootmarks.*',
+                'links.url',
+                'links.title',
+                'links.meta_description',
+                'links.image_path',
+                'media.media_type',
+                'media.path',
+                'media.mime_type',
+                'v.vote')->simplePaginate(20);
+
+            return response()->json([
+                'response' => 'success',
+                'bootmarks' => $bootmarks
+            ]);
+        } else {
+            return response()->json([
+                'response' => 'failure',
+                'message' => 'The user you have requested does not exist'
+            ], 404);
         }
     }
 }
