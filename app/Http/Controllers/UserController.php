@@ -380,6 +380,8 @@ class UserController extends Controller
         ]);
 
         $user = User::find($user);
+        $lat = $request->input('lat');
+        $lng = $request->input('lng');
 
         if($user) {
             /* Create the join for media and links meta data */
