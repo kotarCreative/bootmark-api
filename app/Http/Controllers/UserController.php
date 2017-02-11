@@ -373,10 +373,10 @@ class UserController extends Controller
      */
     public function bootmarks($user, Request $request)
     {
-        $this->validate($request,{
+        $this->validate($request,[
             'lat' => 'required',
             'lng' => 'required',
-        });
+        ]);
 
         $user = User::find($user);
 
