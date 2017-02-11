@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use GuzzleHttp\Client;
+use DB;
 
 class UserController extends Controller
 {
