@@ -388,7 +388,7 @@ class UserController extends Controller
                 ->leftJoin('links','bootmarks.link_id','=','links.id');
 
             $bootmarks = $bootmarks
-                ->leftJoin(DB::raw("(select * from votes where votes.user_id = $user_id) v"),'bootmarks.id', '=', 'v.bootmark_id')
+                ->leftJoin(DB::raw("(select * from votes where votes.user_id = $user->id) v"),'bootmarks.id', '=', 'v.bootmark_id')
                 ->distinct();
 
             $distance_select = "earth_distance(ll_to_earth($lat,$lng), ll_to_earth(lat, lng)) as distance_from_current";
