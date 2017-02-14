@@ -1,4 +1,5 @@
 /vendor
+/public/db-manager
 /public/storage
 Homestead.yaml
 Homestead.json
