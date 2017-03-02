@@ -15,13 +15,4 @@ class Report extends Model
     protected $fillable = [
         'message', 'reason'
     ];
-
-    /**
-     * Grabs the enums from the reports table.
-     *
-     * @return array Returns an array of the enums from the reports table
-     */
-    public static function getEnums() {
-        return ['spam', 'inappropriate'];
-    }
 }

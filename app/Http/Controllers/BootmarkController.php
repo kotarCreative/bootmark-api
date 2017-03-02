@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Storage;
 
 use App\Link, App\Media, App\Bootmark, App\User, App\Follower,
     App\Vote, App\SimpleScraper, App\Report;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class BootmarkController extends Controller
 {
@@ -25,8 +27,15 @@ class BootmarkController extends Controller
     */
     public function index(Request $request)
     {
-
         $user_id = Auth::user()->id;
+        $this->validate($request, [
+            'lat'               => 'required|numeric',
+            'lng'               => 'required|numeric',
+            'rad'               => 'required|numeric',
+            'discoverable'      => 'required|boolean',
+            'filter'            => ['required', Rule::in(['popular', 'newest', 'closest'])]
+        ]);
+
         $lat = $request->input('lat');
         $lng = $request->input('lng');
         $rad = $request->input('rad');
@@ -105,44 +114,38 @@ class BootmarkController extends Controller
         $bootmark = new Bootmark;
         $bootmark->user_id = Auth::user()->id;
 
-        if (in_array($request->input('type'), ['photo', 'link', 'text'])) {
 
-            /* Create a photo */
-            if ($request->input('type') == 'photo') {
+        $this->validate($request, [
+            'lat'              => 'required|numeric',
+            'lng'              => 'required|numeric',
+            'remote'           => 'required|boolean',
+            'location'         => 'required|string',
+            'description'      => 'required|nullable|string',
+            'type'             => ['required', Rule::in(['photo', 'link', 'text'])],
+            'url'              => 'required_if:type,link'
+        ]);
+
+        /* Create a photo */
+        if ($request->input('type') == 'photo') {
+            $bootmark->media_id = $this->createMedia($request);
+            $bootmark->type = "photo";
+
+        /* Link is present */
+        } else if ($request->input('type') == 'link') {
+            /* Check if link is a video/audio media */
+            if ($this->isMedia($request->input('url'))) {
                 $bootmark->media_id = $this->createMedia($request);
-                $bootmark->type = "photo";
+                $bootmark->type = "media";
 
-            /* Link is present */
-            } else if ($request->input('type') == 'link') {
-
-                if ($request->input('url') == null) {
-                    return response()->json([
-                        'response' => 'Failure',
-                        'message' => "missing 'url' parameter"
-                    ], 422);
-                }
-
-                /* Check if link is a video/audio media */
-                if ($this->isMedia($request->input('url'))) {
-                    $bootmark->media_id = $this->createMedia($request);
-                    $bootmark->type = "media";
-
-                    /* Not a video/audio link */
-                } else {
-                    $bootmark->link_id = $this->createLink($request);
-                    $bootmark->type = "link";
-                }
-
-            /* Default to a text post */
+                /* Not a video/audio link */
             } else {
-                $bootmark->type = "text";
+                $bootmark->link_id = $this->createLink($request);
+                $bootmark->type = "link";
             }
+
+        /* Default to a text post */
         } else {
-            return response()->json([
-                'response' => 'Failure',
-                'message' => "missing or invalid 'type' parameter (see accepted values)",
-                'accepted_values' => "['photo', 'link', 'text']"
-            ], 422);
+            $bootmark->type = "text";
         }
 
         /* Set all other values */
@@ -202,16 +205,23 @@ class BootmarkController extends Controller
     {
         $reporter_id = Auth::user()->id;
 
-        $enums = Report::getEnums();
+        $rules = array(
+            'reason'            =>  ['required', Rule::in(['spam', 'inappropriate'])]
+        );
+
+        $messages = array(
+            'reason.in'   =>  "Reason must be either 'spam' or 'inappropriate'"
+        );
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+        $validator->validate();
 
         /* Retrieves the selected bootmark */
         $bootmark = Bootmark::where('id', $bootmark)->first();
-        if ($bootmark == null) {
-            return HttpResponse::notFoundResponse('Bootmark not found');
-        }
 
-        if (!in_array($request->input('reason'), $enums)) {
-            return HttpResponse::generalResponse('Failure', "Reason must be either 'spam' or 'inappropriate'", 422);
+        /* Bootmark was not found */
+        if (!$bootmark) {
+            return HttpResponse::notFoundResponse("Bootmark does not exist");
         }
 
         /* Creates a new report */
@@ -241,6 +251,11 @@ class BootmarkController extends Controller
     {
         $user_id = Auth::user()->id;
         $bootmark = Bootmark::find($bootmark);
+        if (!$bootmark) {
+            return HttpResponse::notFoundResponse("Bootmark does not exist");
+        }
+
+        $this->validate($request, ['vote' => 'required|numeric|between:0,1']);
 
         /* 1 for upvote, 0 for downvote */
         $vote = $request->input('vote');
@@ -332,6 +347,9 @@ class BootmarkController extends Controller
     private function findFriends($id)
     {
         $user = User::find($id);
+        if (!$user) {
+            return array();
+        }
         $friends = array();
         foreach($user->followers as $follower) {
             /* Check to see if you are following the user that has followed you */
@@ -564,14 +582,14 @@ class BootmarkController extends Controller
     /**
      * Returns the photo in a response associated with a given bootmarkID.
      *
-     * @param integer $bootmarkID The ID of the bootmark
+     * @param integer $bootmark The ID of the bootmark
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getPhoto($bootmarkID)
+    public function getPhoto($bootmark)
     {
         /* Retrieves the selected bootmark */
-        $bootmark = Bootmark::where('id', $bootmarkID)->first();
+        $bootmark = Bootmark::where('id', $bootmark)->first();
 
         /* Checks if the bootmark exists or has a media foreign key */
         if ($bootmark == null || $bootmark->media_id == null || $bootmark->media_id == '') {

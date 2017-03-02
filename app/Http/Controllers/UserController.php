@@ -115,6 +115,9 @@ class UserController extends Controller
     public function show($user)
     {
         $user = User::find($user);
+        if ($user == null) {
+            return HttpResponse::notFoundResponse('User not found');
+        }
 
         $bootmark_count = Bootmark::where("user_id", $user->id)->count();
         $follower_count = Follower::where("user_id", $user->id)->count();
@@ -159,6 +162,10 @@ class UserController extends Controller
         /* Retrieves the logged in user */
         $user = User::find(Auth::user()->id);
 
+        if ($user == null) {
+            return HttpResponse::notFoundResponse('User not found');
+        }
+        
         if ($id != $user->id) {
             return HttpResponse::unauthorizedResponse();
         }
@@ -263,7 +270,9 @@ class UserController extends Controller
         $file = $request->file('photo');
         $id = $user;
         $user = User::find(Auth::user()->id);
-
+        if ($user == null) {
+            return HttpResponse::notFoundResponse('User not found');
+        }
 
         /* Specify the rules */
         $rules = array(
