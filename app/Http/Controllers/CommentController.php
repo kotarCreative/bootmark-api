@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 
 use App\Comment, App\Report, App\Bootmark, App\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class CommentController extends Controller
 {
@@ -21,24 +23,19 @@ class CommentController extends Controller
     public function index($bootmark)
     {
         $bootmark = Bootmark::find($bootmark);
-        if($bootmark) {
-            $comments = $bootmark->comments()->orderBy('created_at', 'desc')->paginate(10);
+        if ($bootmark == null)
+            return HttpResponse::notFoundResponse("Bootmark does not exist");
 
-            foreach($comments as $comment) {
-                $user = User::find($comment->user_id);
-                $comment->username = $user->name;
-            }
-
-            return response()->json([
-                'reponse' => 'success',
-                'comments' => $comments
-            ]);
-        } else {
-            return response()->json([
-                'response' => 'failure',
-                'message' => 'The bootmark requested does not exist'
-            ], 422);
+        $comments = $bootmark->comments()->orderBy('created_at', 'desc')->paginate(10);
+        foreach($comments as $comment) {
+            $user = User::find($comment->user_id);
+            $comment->username = $user->name;
         }
+
+        return response()->json([
+            'reponse' => 'Success',
+            'comments' => $comments
+        ]);
     }
 
     /**
@@ -57,6 +54,10 @@ class CommentController extends Controller
 
         $user = Auth::user();
         $bootmark = Bootmark::find($bootmark);
+        if (!$bootmark) {
+            return HttpResponse::notFoundResponse('Bootmark does not exist');
+        }
+
         $comment = new Comment();
         $comment->user_id = $user->id;
         $comment->comment = $request->input('comment');
@@ -65,7 +66,7 @@ class CommentController extends Controller
 
         return response()->json([
             'status' => 200,
-            'message' => 'The bootmark has been commented on.',
+            'message' => 'The Bootmark has been commented on.',
             'user_id' => $user->id,
             'username' => $user->name,
             'created_at' => $comment->created_at->toDateTimeString()
@@ -84,16 +85,21 @@ class CommentController extends Controller
     {
         $reporter_id = Auth::user()->id;
 
-        $enums = Report::getEnums();
+        $rules = array(
+            'reason'            =>  ['required', Rule::in(['spam', 'inappropriate'])],
+        );
+
+        $messages = array(
+            'reason.in'   =>  "Reason must be either 'spam' or 'inappropriate'"
+        );
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+        $validator->validate();
 
         /* Retrieves the selected comment */
         $comment = Comment::where('id', $comment)->first();
         if ($comment == null) {
-            return HttpResponse::notFoundResponse('Comment not found');
-        }
-
-        if (!in_array($request->input('reason'), $enums)) {
-            return HttpResponse::generalResponse('Failure', "Reason must be either 'spam' or 'inappropriate'", 422);
+            return HttpResponse::notFoundResponse('Comment does not exist');
         }
 
         /* Creates a new report */

@@ -31,7 +31,5 @@ class AuthServiceProvider extends ServiceProvider
 
         Passport::tokensExpireIn(Carbon::now('America/Denver')->addDays(30));
         Passport::refreshTokensExpireIn(Carbon::now('America/Denver')->addDays(30));
-        Passport::pruneRevokedTokens();
-
     }
 }
