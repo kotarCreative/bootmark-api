@@ -64,12 +64,15 @@ class BootmarkController extends Controller
         $distance_select = "earth_distance(ll_to_earth($lat,$lng), ll_to_earth(lat, lng)) as distance_from_current";
         if($request->input('filter') == 'closest') {
             $bootmarks = $bootmarks->orderBy('distance_from_current', 'asc');
-            /* Find bootmarks in a radius */
-            //$bootmarks->whereRaw("earth_box(ll_to_earth($lat,$lng), $rad) @> ll_to_earth(lat, lng)");
         } else if($request->input('filter') == 'popular') {
             $bootmarks = $bootmarks->orderBy('karma','desc');
         } else {
             $bootmarks = $bootmarks->orderBy('bootmarks.created_at','desc');
+        }
+
+        /* Finds all bootmarks within the radius given. */
+        if($request->has('rad')) {
+            $bootmarks->whereRaw("earth_box(ll_to_earth($lat,$lng), $rad) @> ll_to_earth(lat, lng)");
         }
 
         $bootmarks = $bootmarks->join('users','bootmarks.user_id','=','users.id');
