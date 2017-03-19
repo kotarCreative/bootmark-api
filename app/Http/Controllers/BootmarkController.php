@@ -32,8 +32,8 @@ class BootmarkController extends Controller
             'lat'               => 'required|numeric',
             'lng'               => 'required|numeric',
             'rad'               => 'required|numeric',
-            'discoverable'      => 'required|boolean',
-            'filter'            => ['required', Rule::in(['popular', 'newest', 'closest'])]
+            //'discoverable'      => 'required|boolean',
+            //'filter'            => ['required', Rule::in(['popular', 'newest', 'closest'])]
         ]);
 
         $lat = $request->input('lat');
