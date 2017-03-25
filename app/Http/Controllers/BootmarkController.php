@@ -113,10 +113,17 @@ class BootmarkController extends Controller
             $bootmark->comments = $comment_count;
         }
 
-        return response()->json([
-            'response' => 'success',
-            'bootmarks' => $bootmarks
-        ]);
+        if($request->has('rad')) {
+            return response()->json([
+                'response' => 'success',
+                'bootmarks' => [ 'data' => $bootmarks ]
+            ]);
+        } else {
+            return response()->json([
+                'response' => 'success',
+                'bootmarks' => $bootmarks
+            ]);
+        }
     }
 
     /**
