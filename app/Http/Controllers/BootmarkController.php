@@ -78,23 +78,32 @@ class BootmarkController extends Controller
         $bootmarks = $bootmarks->join('users','bootmarks.user_id','=','users.id');
 
         /* Select required data and paginate results */
-        $bootmarks = $bootmarks->select(
-                     DB::raw($distance_select),
-                     'users.name',
-                     'bootmarks.*',
-                     'links.url',
-                     'links.title',
-                     'links.meta_description',
-                     'links.image_path',
-                     'media.media_type',
-                     'media.path',
-                     'media.mime_type',
-                     'v.vote');
-
         if($request->has('rad')) {
-            $bootmarks->get();
+            $bootmarks = $bootmarks->select(
+                        DB::raw($distance_select),
+                        'users.name',
+                        'bootmarks.*',
+                        'links.url',
+                        'links.title',
+                        'links.meta_description',
+                        'links.image_path',
+                        'media.media_type',
+                        'media.path',
+                        'media.mime_type',
+                        'v.vote')->get();
         } else {
-            $bootmarks->simplePaginate(20);
+            $bootmarks = $bootmarks->select(
+                        DB::raw($distance_select),
+                        'users.name',
+                        'bootmarks.*',
+                        'links.url',
+                        'links.title',
+                        'links.meta_description',
+                        'links.image_path',
+                        'media.media_type',
+                        'media.path',
+                        'media.mime_type',
+                        'v.vote')->simplePaginate(20);
         }
 
         /* Get a count of comments made on each bootmark being returned. */
