@@ -89,7 +89,13 @@ class BootmarkController extends Controller
                      'media.media_type',
                      'media.path',
                      'media.mime_type',
-                     'v.vote')->simplePaginate(20);
+                     'v.vote');
+
+        if($request->has('rad')) {
+            $bootmarks->get();
+        } else {
+            $bootmark->simplePaginate(20);
+        }
 
         /* Get a count of comments made on each bootmark being returned. */
         foreach($bootmarks as $bootmark) {
