@@ -31,9 +31,9 @@ class BootmarkController extends Controller
         $this->validate($request, [
             'lat'               => 'required|numeric',
             'lng'               => 'required|numeric',
-            'rad'               => 'required|numeric',
-            'discoverable'      => 'required|boolean',
-            'filter'            => ['required', Rule::in(['popular', 'newest', 'closest'])]
+            //'rad'               => 'required|numeric',
+            //'discoverable'      => 'required|boolean',
+            //'filter'            => ['required', Rule::in(['popular', 'newest', 'closest'])]
         ]);
 
         $lat = $request->input('lat');
