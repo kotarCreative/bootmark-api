@@ -94,7 +94,7 @@ class BootmarkController extends Controller
         if($request->has('rad')) {
             $bootmarks->get();
         } else {
-            $bootmark->simplePaginate(20);
+            $bootmarks->simplePaginate(20);
         }
 
         /* Get a count of comments made on each bootmark being returned. */
