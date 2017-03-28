@@ -80,7 +80,7 @@ class BootmarkController extends Controller
         /* Finds all bootmarks within the radius given. */
         if($request->has('rad')) {
             //$bootmarks->whereRaw("earth_box(ll_to_earth($lat,$lng), $rad) @> ll_to_earth(lat, lng)");
-            $bootmarks->whereRaw("ST_DWithin(location, ST_GeographyFromText('SRID=4326;POINT($lng $lat)'), $rad)");
+            $bootmarks->whereRaw("ST_DWithin(coordinates, ST_GeographyFromText('SRID=4326;POINT($lng $lat)'), $rad)");
         }
 
         $bootmarks = $bootmarks->join('users','bootmarks.user_id','=','users.id');
