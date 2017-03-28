@@ -62,7 +62,11 @@ class BootmarkController extends Controller
         }
 
         /* Applies the filter that has been selected */
-        $distance_select = "earth_distance(ll_to_earth($lat,$lng), ll_to_earth(lat, lng)) as distance_from_current";
+        //$distance_select = "earth_distance(ll_to_earth($lat,$lng), ll_to_earth(lat, lng)) as distance_from_current";
+
+        /* POSTGIS application of distance select */
+        $distance_select = "ST_Distance(ST_GeographyFromText('SRID=4326;POINT($lng $lat)'), coordinates) as distance_from_current";
+
         if($request->input('filter') == 'closest') {
             $bootmarks = $bootmarks->orderBy('distance_from_current', 'asc');
         } else if($request->input('filter') == 'popular') {
