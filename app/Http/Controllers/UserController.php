@@ -373,6 +373,14 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Retrieves all the followers for a user with the followers username (as follower_name) as well.
+     *
+     * @param int $user The id of the user to get followers for.
+     * @param Request $request The request containing all the required fields
+     * 
+     * @return \Illuminate\Http\JsonResponse Returns a response containing all the followers for the user.
+     */
     public function getFollowers($user, Request $request)
     {
         $user = User::find($user);
