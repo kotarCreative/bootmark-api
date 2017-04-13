@@ -373,6 +373,26 @@ class UserController extends Controller
         }
     }
 
+    public function getFollowers($user, Request $request)
+    {
+        $user = User::find($user);
+
+        if (!$user) {
+            return HttpResponse::notFoundResponse("User does not exist");
+        }
+
+        $followers = DB::table('followers')
+            ->where("user_id", $user->id)
+            ->join("users", "users.id", '=', 'followers.follower_id')
+            ->select("followers.*", "users.name as follower_name")
+            ->get();
+
+        return response()->json([
+            'response' => 'Success',
+        'followers' => [ 'data' => $followers ]
+        ]);
+    }
+
     /**
      * Retrieves all the bootmarks for a user sorted by time.
      *
