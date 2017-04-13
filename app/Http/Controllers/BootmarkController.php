@@ -14,6 +14,7 @@ use App\Link, App\Media, App\Bootmark, App\User, App\Follower,
     App\Vote, App\SimpleScraper, App\Report;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class BootmarkController extends Controller
 {
@@ -65,7 +66,9 @@ class BootmarkController extends Controller
         if($request->input('filter') == 'closest') {
             $bootmarks = $bootmarks->orderBy('distance_from_current', 'asc');
         } else if($request->input('filter') == 'popular') {
-            $bootmarks = $bootmarks->orderBy('karma','desc');
+            $filter_days = 30;
+            $bootmarks = $bootmarks->where('bootmarks.created_at', '>', Carbon::now()->subDay($filter_days))
+                                    ->orderBy('karma','desc');
         } else {
             $bootmarks = $bootmarks->orderBy('bootmarks.created_at','desc');
         }
