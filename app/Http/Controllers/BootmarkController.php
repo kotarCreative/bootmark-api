@@ -4,14 +4,14 @@ namespace App\Http\Controllers;
 
 use App\HttpResponse;
 use App\Jobs\MailReport;
-use App\Photo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\SearchBootmarks as Search;
 
-use App\Link, App\Media, App\Bootmark, App\User, App\Follower,
-    App\Vote, App\SimpleScraper, App\Report;
+use App\Models\Link, App\Models\Media, App\Models\Photo, App\Models\Bootmark, App\Models\User, App\Models\Follower,
+    App\Models\Vote, App\SimpleScraper, App\Models\Report;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
@@ -332,6 +332,19 @@ class BootmarkController extends Controller
                 ]);
         }
     }
+
+    /**
+     * Search for bootmarks within a specific lat and lng.
+     *
+     * @param \App\Http\Requests\SearchBootmarks $request
+     *
+     * @return json
+     */
+    public function search(Search $request)
+    {
+
+    }
+
 
     /**
      * Checks to see if the user has voted on a bootmark already.

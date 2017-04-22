@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Laravel\Passport\HasApiTokens;

@@ -2,20 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Bootmark;
-use App\Follower;
 use App\HttpResponse;
 use App\Jobs\MailNewUser;
 use App\Jobs\MailReport;
-use App\Photo;
-use App\ProfilePicture;
-use App\User, App\Report;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use GuzzleHttp\Client;
 use DB;
+
+use App\Models\Photo, App\Models\ProfilePicture, App\Models\User, App\Models\Report, App\Models\Bootmark, App\Models\Follower;
 
 class UserController extends Controller
 {
