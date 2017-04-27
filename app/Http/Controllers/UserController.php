@@ -403,7 +403,7 @@ class UserController extends Controller
 
         return response()->json([
             'response' => 'Success',
-        'followers' => [ 'data' => $followers ]
+            'followers' => $followers
         ]);
     }
 
