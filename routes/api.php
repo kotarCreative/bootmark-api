@@ -31,10 +31,11 @@ Route::group(['prefix' => 'v1', 'middleware' => 'auth:api'], function () {
     Route::get('bootmarks/{bootmark}/comment', 'CommentController@index');
 
     /* User Requests */
-    Route::resource('users', 'UserController', ['only' => ['show', 'update', 'destroy']]);
+    Route::get('users/{user}/follow', 'UserController@getFollowers');
     Route::get('users/{user}/photo', 'UserController@getPhoto');
     Route::post('users/{user}/photo', 'UserController@savePhoto');
     Route::post('users/{user}/report','UserController@report');
     Route::post('users/{user}/follow', 'UserController@follow');
     Route::get('users/{user}/bootmarks', 'UserController@bootmarks');
+    Route::resource('users', 'UserController', ['only' => ['show', 'update', 'destroy']]);
 });
