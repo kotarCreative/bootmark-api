@@ -399,7 +399,7 @@ class UserController extends Controller
                      "users.city as follower_city",
                      "users.prov_state as follower_prov_state",
                      "users.country as follower_country")
-            ->get();
+            ->simplePaginate(20);
 
         return response()->json([
             'response' => 'Success',
