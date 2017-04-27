@@ -392,7 +392,13 @@ class UserController extends Controller
         $followers = DB::table('followers')
             ->where("user_id", $user->id)
             ->join("users", "users.id", '=', 'followers.follower_id')
-            ->select("followers.*", "users.name as follower_name")
+            ->select("followers.*",
+                     "users.name as follower_username",
+                     "users.first_name as follower_first_name",
+                     "users.last_name as follower_last_name",
+                     "users.city as follower_city",
+                     "users.prov_state as follower_prov_state",
+                     "users.country as follower_country")
             ->get();
 
         return response()->json([
