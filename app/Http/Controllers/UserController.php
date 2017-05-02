@@ -425,7 +425,7 @@ class UserController extends Controller
         }
 
         $followings = DB::table('followers')
-            ->where("user_id", $user->id)
+            ->where("follower_id", $user->id)
             ->join("users", "users.id", '=', 'followers.user_id')
             ->select("followers.*",
                 "users.name as following_username",
