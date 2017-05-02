@@ -441,7 +441,7 @@ class UserController extends Controller
     public function search(Request $request) {
         if($request->has('search')) {
             $search_term = $request->input('search');
-            $users = User::whereRaw("name LIKE %$search_term%")->limit(20)->get();
+            $users = User::whereRaw("name LIKE %$search_term%")->offset(0)->limit(20)->get();
         } else {
             $users = User::all()->limit(20)->get();
         }
