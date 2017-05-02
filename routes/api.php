@@ -32,6 +32,7 @@ Route::group(['prefix' => 'v1', 'middleware' => 'auth:api'], function () {
 
     /* User Requests */
     Route::get('users/{user}/follow', 'UserController@getFollowers');
+    Route::get('users/{user}/following', 'UserController@getFollowing');
     Route::resource('users', 'UserController', ['only' => ['show', 'update', 'destroy']]);
     Route::post('users/search', 'UserController@search');
     Route::get('users/{user}/photo', 'UserController@getPhoto');

@@ -407,6 +407,41 @@ class UserController extends Controller
         ]);
     }
 
+
+    /**
+     * Retrieves all the users that a user is following.
+     *
+     * @param int $user The id of the user to get followers for.
+     * @param Request $request The request containing all the required fields
+     *
+     * @return \Illuminate\Http\JsonResponse Returns a response containing all the followers for the user.
+     */
+    public function getFollowing($user, Request $request)
+    {
+        $user = User::find($user);
+
+        if (!$user) {
+            return HttpResponse::notFoundResponse("User does not exist");
+        }
+
+        $followings = DB::table('followers')
+            ->where("user_id", $user->id)
+            ->join("users", "users.id", '=', 'followers.user_id')
+            ->select("followers.*",
+                "users.name as following_username",
+                "users.first_name as following_first_name",
+                "users.last_name as following_last_name",
+                "users.city as following_city",
+                "users.prov_state as following_prov_state",
+                "users.country as following_country")
+            ->simplePaginate(20);
+
+        return response()->json([
+            'response' => 'Success',
+            'followings' => $followings
+        ]);
+    }
+
     /**
      * Retrieves all the bootmarks for a user sorted by time.
      *
