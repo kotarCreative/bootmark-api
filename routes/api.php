@@ -32,6 +32,8 @@ Route::group(['prefix' => 'v1', 'middleware' => 'auth:api'], function () {
 
     /* User Requests */
     Route::get('users/{user}/follow', 'UserController@getFollowers');
+    Route::resource('users', 'UserController', ['only' => ['show', 'update', 'destroy']]);
+    Route::post('users/search', 'UserController@search');
     Route::get('users/{user}/photo', 'UserController@getPhoto');
     Route::post('users/{user}/photo', 'UserController@savePhoto');
     Route::post('users/{user}/report','UserController@report');

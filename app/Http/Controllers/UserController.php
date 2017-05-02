@@ -464,4 +464,22 @@ class UserController extends Controller
             ], 404);
         }
     }
+
+    /**
+     * Search for users.
+     *
+     * @param \Illuminate\Http\Request $request
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function search(Request $request) {
+        if($request->has('search')) {
+            $search_term = strtoupper($request->input('search'));
+            $users = DB::table('users')->whereRaw("UPPER(name) LIKE '$search_term%'")->offset(0)->limit(20)->get();
+        } else {
+            $users = DB::table('users')->offset(0)->limit(20)->get();
+        }
+
+        return $users;
+    }
 }
