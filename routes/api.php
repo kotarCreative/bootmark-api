@@ -21,6 +21,7 @@ Route::group(['prefix' => 'v1'], function() {
 Route::group(['prefix' => 'v1', 'middleware' => 'auth:api'], function () {
     /* Bootmark Requests */
     Route::get('bootmarks/{bootmark}/photo', 'BootmarkController@getPhoto');
+    Route::post('bootmarks/cluster','BootmarkController@cluster');
     Route::post('bootmarks/{bootmark}/vote','BootmarkController@vote');
     Route::post('bootmarks/{bootmark}/report','BootmarkController@report');
     Route::resource('bootmarks', 'BootmarkController', ['except' => ['create', 'show', 'edit']]);

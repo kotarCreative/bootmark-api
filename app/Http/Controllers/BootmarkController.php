@@ -135,6 +135,35 @@ class BootmarkController extends Controller
     }
 
     /**
+     * Returns a cluster of bootmarks for a specific quadrant.
+     *
+     * @param Request $request
+     */
+    public function cluster(Request $request)
+    {
+        $user_id = Auth::user()->id;
+
+        $north_west = $request->input("northWest");
+        $north_east = $request->input("northEast");
+        $south_west = $request->input("southWest");
+        $south_east = $request->input("southEast");
+
+        $markers = [
+            [
+                'lat'              => "asdf",
+                'lng'              => "asdf",
+                'count'            => "asdf",
+                'bootmarks'        => [1, 2, 3, 4, 5]
+            ]
+        ];
+
+        return response()->json([
+            'response' => 'Success',
+            'markers' => $markers
+        ]);
+    }
+
+    /**
      * Stores a new bootmark in the database.
      *
      * @param Request $request The request object with all the inputs.
