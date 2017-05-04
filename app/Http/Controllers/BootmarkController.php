@@ -171,9 +171,16 @@ class BootmarkController extends Controller
                 /* ST_MakeEnvelope(LEFT, BOTTOM, RIGHT, TOP, SRID) -- https://gis.stackexchange.com/questions/25797/select-bounding-box-using-postgis */
                 $bootmarks[] = Bootmark::selectRaw("count(*) as count")
                                ->whereExists(function($query) use ($nw_lat, $nw_lng, $se_lat, $se_lng) {
-                                   $envelope = "ST_MakeEnvelope($nw_lng, $se_lat, $se_lng, $nw_lat, 4326)";
-                                   $query->select(DB::raw(1))
-                                         ->whereRaw("geometry(coordinates) && $envelope");
+                                   if ($nw_lng > $se_lng) {
+                                        $envelope_1 = "ST_MakeEnvelope($nw_lng, $se_lat, 180, $nw_lat, 4326)";
+                                        $envelope_2 = "ST_MakeEnvelope(-180, $se_lat, $se_lng, $nw_lat, 4326)";
+                                        $query->select(DB::raw(1))
+                                              ->whereRaw("(geometry(coordinates) && $envelope_1) OR (geometry(coordinates) && $envelope_2)");
+                                   } else {
+                                        $envelope = "ST_MakeEnvelope($nw_lng, $se_lat, $se_lng, $nw_lat, 4326)";
+                                        $query->select(DB::raw(1))
+                                              ->whereRaw("geometry(coordinates) && $envelope");
+                                   }
                                })->get();
                 }
        }
