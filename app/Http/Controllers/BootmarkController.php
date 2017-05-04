@@ -142,18 +142,37 @@ class BootmarkController extends Controller
     public function cluster(Request $request)
     {
         $user_id = Auth::user()->id;
+	$grid_part_width_amt = 2;
+	$grid_part_height_amt = 2;
 
         $north_west = $request->input("northWest");
         $north_east = $request->input("northEast");
         $south_west = $request->input("southWest");
         $south_east = $request->input("southEast");
 
-        $markers = [
+        $grid_width_div = abs(floatval($north_west["lng"]) - floatval($north_east["lng"])) / $grid_part_width_amt;
+        $grid_height_div = abs(floatval($north_west["lat"]) - floatval($south_west["lat"])) / $grid_part_height_amt;
+
+	$bootmarks = [];
+	$start_coord = [$north_west["lng"], $north_west["lat"]];
+	for ($h = 1; $h <= $grid_part_height_amt; $h++) {
+	    $next_lat = $start_coord[1] - ($grid_height_div * $h);
+	    
+	    for ($w = 1; $w <= $grid_part_width_amt; $w++) {
+	    	$next_lng = $start_coord[0] - ($grid_width_div * $w);
+		$end_coord = [$next_lng, $next_lat];
+	    	$bootmarks[] = DB::table('bootmarks')
+			     ->whereRaw("ST_DWithin(ST_GeographyFromText('SRID=4326;POINT($start_coord[0] $start_coord[1])'), ST_GeographyFromText('SRID=4326;POINT($end_coord[0] $end_coord[1])'), 1000)")				->get();
+	    }
+	    $start_coord = [$north_west["lng"], $next_lat];
+	}
+
+	$markers = [
             [
                 'lat'              => "asdf",
                 'lng'              => "asdf",
                 'count'            => "asdf",
-                'bootmarks'        => [1, 2, 3, 4, 5]
+                'bootmarks'        => $bootmarks
             ]
         ];
 
