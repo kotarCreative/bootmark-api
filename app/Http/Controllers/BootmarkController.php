@@ -142,48 +142,66 @@ class BootmarkController extends Controller
     public function cluster(Request $request)
     {
         $user_id = Auth::user()->id;
-	$width = 10;
-	$height = 10;
+	    $width = 2;
+	    $height = 2;
 
         $north_west = $request->input("northWest");
         $north_east = $request->input("northEast");
         $south_west = $request->input("southWest");
         $south_east = $request->input("southEast");
 
-	$grid_width = abs(floatval($north_west["lng"]) - floatval($north_east["lng"])) / $width;
+        if (floatval($north_west["lng"]) > floatval($north_east["lng"])) {
+            $grid_width = ((180 - floatval($north_west["lng"])) + (180 - abs(floatval($north_east["lng"])))) / $width;
+        } else {
+            $grid_width = abs(floatval($north_west["lng"]) - floatval($north_east["lng"])) / $width;
+        }
         $grid_height = abs(floatval($north_west["lat"]) - floatval($south_west["lat"])) / $height;
 
-	$bootmarks = [];
+        $bootmarks = [];
 
-	for($i = 0; $i < $width; $i++) {
-	    for($x = 0; $x < $height; $x++) {
-	        $nw_lat = $north_west["lat"] - ($grid_height * $i);
-                $nw_lng = $north_west["lng"] + ($grid_width * $x);
+        for($i = 0; $i < $width; $i++) {
+            for($x = 0; $x < $height; $x++) {
+	            $nw_lat = $north_west["lat"] - ($grid_height * $i);
+                $nw_lng = $this->calc_coord($north_west["lng"], $grid_width, $x);
 
-                $se_lat = $north_west["lat"] - ($grid_height * ($i + 1));
-		$se_lng = $north_west["lng"] + ($grid_width * ($x + 1));
-		//dd(array("nw_lat"=>$nw_lat, "nw_lng"=>$nw_lng, "se_lat"=>$se_lat, $se_lng, $grid_width, $grid_height));
+                $se_lat = $south_east["lat"] - ($grid_height * ($i + 1));
+                $se_lng = $this->calc_coord($south_east["lng"], $grid_width, $x + 1);
+                dd(array("nw_lat"=>$nw_lat, "nw_lng"=>$nw_lng, "se_lat"=>$se_lat, "se_lng"=>$se_lng, "grid_width"=>$grid_width, "grid_height"=>$grid_height));
+
+                /* ST_MakeEnvelope(LEFT, BOTTOM, RIGHT, TOP, SRID) -- https://gis.stackexchange.com/questions/25797/select-bounding-box-using-postgis */
                 $bootmarks[] = Bootmark::selectRaw("count(*) as count")
-			     ->whereExists(function($query) use ($nw_lat, $nw_lng, $se_lat, $se_lng) {
-                               $query->select(DB::raw(1))
-		                     ->whereRaw("ST_Within(geometry(coordinates), ST_MakeEnvelope($nw_lng, $nw_lat, $se_lng, $se_lat, 4326))");
-                })->get();
-            }
+                               ->whereExists(function($query) use ($nw_lat, $nw_lng, $se_lat, $se_lng) {
+                                   $envelope = "ST_MakeEnvelope($nw_lng, $nw_lat, $se_lng, $se_lat, 4326)";
+                                   $query->select(DB::raw(1))
+                                         ->whereRaw("geometry(coordinates) && $envelope");
+                               })->get();
+                }
        }
 
-	$markers = [
-            [
-                'lat'              => "asdf",
-                'lng'              => "asdf",
-                'count'            => "asdf",
-                'bootmarks'        => $bootmarks
-            ]
-        ];
+       $markers = [
+           [
+               'lat'              => "asdf",
+               'lng'              => "asdf",
+               'count'            => "asdf",
+               'bootmarks'        => $bootmarks
+           ]
+       ];
 
-        return response()->json([
-            'response' => 'Success',
-            'markers' => $markers
-        ]);
+       return response()->json([
+           'response' => 'Success',
+           'markers' => $markers
+       ]);
+    }
+
+
+    private function calc_coord($lng, $width, $idx)
+    {
+        /* Checks for longitude wrapping  */
+        if (($lng + ($width * $idx)) > 180) {
+            return $lng + ($width * $idx) - 360;
+        } else {
+            return $lng + ($width * $idx);
+        }
     }
 
     /**
