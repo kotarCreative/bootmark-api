@@ -159,10 +159,11 @@ class BootmarkController extends Controller
 	    $next_lat = $start_coord[1] - ($grid_height_div * $h);
 	    
 	    for ($w = 1; $w <= $grid_part_width_amt; $w++) {
-	    	$next_lng = $start_coord[0] - ($grid_width_div * $w);
+	    	$next_lng = $start_coord[0] + ($grid_width_div * $w);
 		$end_coord = [$next_lng, $next_lat];
+		dd($start_coord, $end_coord, $south_east);
 	    	$bootmarks[] = DB::table('bootmarks')
-			     ->whereRaw("ST_DWithin(ST_GeographyFromText('SRID=4326;POINT($start_coord[0] $start_coord[1])'), ST_GeographyFromText('SRID=4326;POINT($end_coord[0] $end_coord[1])'), 1000)")				->get();
+			     ->whereRaw("ST_Within(ST_GeographyFromText('SRID=4326;POINT($start_coord[0] $start_coord[1])'), ST_GeographyFromText('SRID=4326;POINT($end_coord[0] $end_coord[1])'), 1000)")				->get();
 	    }
 	    $start_coord = [$north_west["lng"], $next_lat];
 	}
