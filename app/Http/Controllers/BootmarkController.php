@@ -164,14 +164,14 @@ class BootmarkController extends Controller
 	            $nw_lat = $north_west["lat"] - ($grid_height * $i);
                 $nw_lng = $this->calc_coord($north_west["lng"], $grid_width, $x);
 
-                $se_lat = $south_east["lat"] - ($grid_height * ($i + 1));
-                $se_lng = $this->calc_coord($south_east["lng"], $grid_width, $x + 1);
-                dd(array("nw_lat"=>$nw_lat, "nw_lng"=>$nw_lng, "se_lat"=>$se_lat, "se_lng"=>$se_lng, "grid_width"=>$grid_width, "grid_height"=>$grid_height));
+                $se_lat = $north_west["lat"] - ($grid_height * ($i + 1));
+                $se_lng = $this->calc_coord($north_west["lng"], $grid_width, $x + 1);
+                //dd(array("nw_lat"=>$nw_lat, "nw_lng"=>$nw_lng, "se_lat"=>$se_lat, "se_lng"=>$se_lng, "grid_width"=>$grid_width, "grid_height"=>$grid_height));
 
                 /* ST_MakeEnvelope(LEFT, BOTTOM, RIGHT, TOP, SRID) -- https://gis.stackexchange.com/questions/25797/select-bounding-box-using-postgis */
                 $bootmarks[] = Bootmark::selectRaw("count(*) as count")
                                ->whereExists(function($query) use ($nw_lat, $nw_lng, $se_lat, $se_lng) {
-                                   $envelope = "ST_MakeEnvelope($nw_lng, $nw_lat, $se_lng, $se_lat, 4326)";
+                                   $envelope = "ST_MakeEnvelope($nw_lng, $se_lat, $se_lng, $nw_lat, 4326)";
                                    $query->select(DB::raw(1))
                                          ->whereRaw("geometry(coordinates) && $envelope");
                                })->get();
