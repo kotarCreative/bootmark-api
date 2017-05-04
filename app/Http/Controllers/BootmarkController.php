@@ -142,31 +142,34 @@ class BootmarkController extends Controller
     public function cluster(Request $request)
     {
         $user_id = Auth::user()->id;
-	$grid_part_width_amt = 2;
-	$grid_part_height_amt = 2;
+	$width = 10;
+	$height = 10;
 
         $north_west = $request->input("northWest");
         $north_east = $request->input("northEast");
         $south_west = $request->input("southWest");
         $south_east = $request->input("southEast");
 
-        $grid_width_div = abs(floatval($north_west["lng"]) - floatval($north_east["lng"])) / $grid_part_width_amt;
-        $grid_height_div = abs(floatval($north_west["lat"]) - floatval($south_west["lat"])) / $grid_part_height_amt;
+	$grid_width = abs(floatval($north_west["lng"]) - floatval($north_east["lng"])) / $width;
+        $grid_height = abs(floatval($north_west["lat"]) - floatval($south_west["lat"])) / $height;
 
 	$bootmarks = [];
-	$start_coord = [$north_west["lng"], $north_west["lat"]];
-	for ($h = 1; $h <= $grid_part_height_amt; $h++) {
-	    $next_lat = $start_coord[1] - ($grid_height_div * $h);
-	    
-	    for ($w = 1; $w <= $grid_part_width_amt; $w++) {
-	    	$next_lng = $start_coord[0] + ($grid_width_div * $w);
-		$end_coord = [$next_lng, $next_lat];
-		dd($start_coord, $end_coord, $south_east);
-	    	$bootmarks[] = DB::table('bootmarks')
-			     ->whereRaw("ST_Within(ST_GeographyFromText('SRID=4326;POINT($start_coord[0] $start_coord[1])'), ST_GeographyFromText('SRID=4326;POINT($end_coord[0] $end_coord[1])'), 1000)")				->get();
-	    }
-	    $start_coord = [$north_west["lng"], $next_lat];
-	}
+
+	for($i = 0; $i < $width; $i++) {
+	    for($x = 0; $x < $height; $x++) {
+	        $nw_lat = $north_west["lat"] - ($grid_height * $i);
+                $nw_lng = $north_west["lng"] + ($grid_width * $x);
+
+                $se_lat = $north_west["lat"] - ($grid_height * ($i + 1));
+		$se_lng = $north_west["lng"] + ($grid_width * ($x + 1));
+		//dd(array("nw_lat"=>$nw_lat, "nw_lng"=>$nw_lng, "se_lat"=>$se_lat, $se_lng, $grid_width, $grid_height));
+                $bootmarks[] = Bootmark::selectRaw("count(*) as count")
+			     ->whereExists(function($query) use ($nw_lat, $nw_lng, $se_lat, $se_lng) {
+                               $query->select(DB::raw(1))
+		                     ->whereRaw("ST_Within(geometry(coordinates), ST_MakeEnvelope($nw_lng, $nw_lat, $se_lng, $se_lat, 4326))");
+                })->get();
+            }
+       }
 
 	$markers = [
             [
