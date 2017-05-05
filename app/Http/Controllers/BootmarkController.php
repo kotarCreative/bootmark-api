@@ -169,7 +169,7 @@ class BootmarkController extends Controller
                 //dd(array("nw_lat"=>$nw_lat, "nw_lng"=>$nw_lng, "se_lat"=>$se_lat, "se_lng"=>$se_lng, "grid_width"=>$grid_width, "grid_height"=>$grid_height));
 
                 /* ST_MakeEnvelope(LEFT, BOTTOM, RIGHT, TOP, SRID) -- https://gis.stackexchange.com/questions/25797/select-bounding-box-using-postgis */
-                $bootmarks[] = Bootmark::selectRaw("count(*) as count")
+                $grid_query = Bootmark::selectRaw("id, location, description, lat, lng, discoverable")
                                ->whereExists(function($query) use ($nw_lat, $nw_lng, $se_lat, $se_lng) {
                                    if ($nw_lng > $se_lng) {
                                         $envelope_1 = "ST_MakeEnvelope($nw_lng, $se_lat, 180, $nw_lat, 4326)";
@@ -182,17 +182,20 @@ class BootmarkController extends Controller
                                               ->whereRaw("geometry(coordinates) && $envelope");
                                    }
                                })->get();
-                }
-       }
 
-       $markers = [
-           [
-               'lat'              => "asdf",
-               'lng'              => "asdf",
-               'count'            => "asdf",
-               'bootmarks'        => $bootmarks
-           ]
-       ];
+                $count = $grid_query->count();
+                switch ($count) {
+                case 0:
+                    $markers[] = [ 'lat' => '', 'lng' => '', 'count' => $count, 'bootmarks' => $grid_query ];
+                    break;
+                case 1:
+                    $markers[] = [ 'lat' => $grid_query[0]["lat"], 'lng' => $grid_query[0]["lng"], 'count' => $count, 'bootmarks' => $grid_query ];
+                    break;
+                default:
+                    $markers[] = [ 'lat' => 'asdf', 'lng' => 'asdf', 'count' => $count, 'bootmarks' => $grid_query ];
+                }
+            }
+       }
 
        return response()->json([
            'response' => 'Success',
