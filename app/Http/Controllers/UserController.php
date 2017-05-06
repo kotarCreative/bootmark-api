@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\HttpResponse;
+use App\Models\HttpResponse;
 use App\Jobs\MailNewUser;
 use App\Jobs\MailReport;
 

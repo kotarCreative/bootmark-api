@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\HttpResponse;
+use App\Models\HttpResponse;
 use App\Jobs\MailReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
