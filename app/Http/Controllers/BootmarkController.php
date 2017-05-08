@@ -142,8 +142,16 @@ class BootmarkController extends Controller
     public function cluster(Request $request)
     {
         $user_id = Auth::user()->id;
-	    $width = 2;
-	    $height = 2;
+
+        $this->validate($request, [
+            'northWest'  => 'required', 'northWest.lng'  => 'required', 'northWest.lat'  => 'required',
+            'northEast'  => 'required', 'northEast.lng'  => 'required', 'northEast.lat'  => 'required',
+            'southWest'  => 'required', 'southWest.lng'  => 'required', 'southWest.lat'  => 'required',
+            'southEast'  => 'required', 'southEast.lng'  => 'required', 'southEast.lat'  => 'required',
+            'zoomLevel'  => 'required'
+        ]);
+
+        $div_amt = $this->getDividerAmount($request->input("zoomLevel"));
 
         $north_west = $request->input("northWest");
         $north_east = $request->input("northEast");
@@ -151,16 +159,16 @@ class BootmarkController extends Controller
         $south_east = $request->input("southEast");
 
         if (floatval($north_west["lng"]) > floatval($north_east["lng"])) {
-            $grid_width = ((180 - floatval($north_west["lng"])) + (180 - abs(floatval($north_east["lng"])))) / $width;
+            $grid_width = ((180 - floatval($north_west["lng"])) + (180 - abs(floatval($north_east["lng"])))) / $div_amt;
         } else {
-            $grid_width = abs(floatval($north_west["lng"]) - floatval($north_east["lng"])) / $width;
+            $grid_width = abs(floatval($north_west["lng"]) - floatval($north_east["lng"])) / $div_amt;
         }
-        $grid_height = abs(floatval($north_west["lat"]) - floatval($south_west["lat"])) / $height;
+        $grid_height = abs(floatval($north_west["lat"]) - floatval($south_west["lat"])) / $div_amt;
 
         $bootmarks = [];
 
-        for($i = 0; $i < $width; $i++) {
-            for($x = 0; $x < $height; $x++) {
+        for($i = 0; $i < $div_amt; $i++) {
+            for($x = 0; $x < $div_amt; $x++) {
 	            $nw_lat = $north_west["lat"] - ($grid_height * $i);
                 $nw_lng = $this->calc_coord($north_west["lng"], $grid_width, $x);
 
@@ -192,7 +200,9 @@ class BootmarkController extends Controller
                     $markers[] = [ 'lat' => $grid_query[0]["lat"], 'lng' => $grid_query[0]["lng"], 'count' => $count, 'bootmarks' => $grid_query ];
                     break;
                 default:
-                    $markers[] = [ 'lat' => 'asdf', 'lng' => 'asdf', 'count' => $count, 'bootmarks' => $grid_query ];
+                    $mkr_lat = $nw_lat - ($grid_height / 2);
+                    $mkr_lng = $this->calc_coord($nw_lng, ($grid_width / 2), $x);
+                    $markers[] = [ 'lat' => $mkr_lat, 'lng' => $mkr_lng, 'count' => $count, 'bootmarks' => $grid_query ];
                 }
             }
        }
@@ -211,6 +221,40 @@ class BootmarkController extends Controller
             return $lng + ($width * $idx) - 360;
         } else {
             return $lng + ($width * $idx);
+        }
+    }
+
+    /**
+     * Gets the amount of dividers to create based on the zoom level.
+     *
+     * @param Integer $zoom
+     *
+     * @return 
+     */
+    private function getDividerAmount($zoom)
+    {
+        switch ($zoom) {
+        case 1:  return 10;
+        case 2:  return 14;
+        case 3:  return 18;
+        case 4:  return 20;
+        case 5:  return 25;
+        case 6:  return 30;
+        case 7:  return 35;
+        case 8:  return 40;
+        case 9:  return 45;
+        case 10: return 50;
+        case 11: return 55;
+        case 12: return 60;
+        case 13: return 65;
+        case 14: return 70;
+        case 15: return 75;
+        case 16: return 80;
+        case 17: return 85;
+        case 18: return 90;
+        case 19: return 95;
+        case 20: return 100;
+        default: return 4;
         }
     }
 
