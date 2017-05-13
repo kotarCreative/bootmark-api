@@ -200,8 +200,35 @@ class BootmarkController extends Controller
                     $markers[] = [ 'lat' => $grid_query[0]["lat"], 'lng' => $grid_query[0]["lng"], 'count' => $count, 'bootmarks' => $grid_query ];
                     break;
                 default:
-                    $mkr_lat = $nw_lat - ($grid_height / 2);
-                    $mkr_lng = $this->calc_coord($nw_lng, ($grid_width / 2), $x);
+                    /* Get the lats and lngs for bootmarks */
+                    $lats = $grid_query->pluck('lat');
+                    $lngs = $grid_query->pluck('lng');
+
+                    /* Initialize */
+                    $x = [];
+                    $y = [];
+                    $z = [];
+
+                    for ($i = 0; $i < count($lats); $i++) {
+                        /* Convert to radians */
+                        $lats[$i] = $lats[$i] * pi() / 180;
+                        $lngs[$i] = $lngs[$i] * pi() / 180;
+
+                        /* Get computations for each x, y, z */
+                        $x[] = cos($lats[$i]) * cos($lngs[$i]);
+                        $y[] = cos($lats[$i]) * sin($lngs[$i]);
+                        $z[] = sin($lats[$i]);
+                    }
+
+                    /* Get average */
+                    $x = array_sum($x) / $count;
+                    $y = array_sum($y) / $count;
+                    $z = array_sum($z) / $count;
+
+                    /* Get coordinate and convert to degrees */
+                    $mkr_lat = atan2($z, sqrt(($x * $x) + ($y * $y))) * 180 / pi();
+                    $mkr_lng = atan2($y, $x) * 180 / pi();
+
                     $markers[] = [ 'lat' => $mkr_lat, 'lng' => $mkr_lng, 'count' => $count, 'bootmarks' => $grid_query ];
                 }
             }
@@ -234,26 +261,26 @@ class BootmarkController extends Controller
     private function getDividerAmount($zoom)
     {
         switch ($zoom) {
-        case 1:  return 10;
-        case 2:  return 14;
-        case 3:  return 18;
+        case 1:  return 8;
+        case 2:  return 12;
+        case 3:  return 16;
         case 4:  return 20;
-        case 5:  return 25;
-        case 6:  return 30;
-        case 7:  return 35;
-        case 8:  return 40;
-        case 9:  return 45;
-        case 10: return 50;
-        case 11: return 55;
-        case 12: return 60;
-        case 13: return 65;
-        case 14: return 70;
-        case 15: return 75;
-        case 16: return 80;
-        case 17: return 85;
-        case 18: return 90;
-        case 19: return 95;
-        case 20: return 100;
+        case 5:  return 24;
+        case 6:  return 28;
+        case 7:  return 32;
+        case 8:  return 36;
+        case 9:  return 40;
+        case 10: return 44;
+        case 11: return 48;
+        case 12: return 52;
+        case 13: return 56;
+        case 14: return 60;
+        case 15: return 64;
+        case 16: return 68;
+        case 17: return 72;
+        case 18: return 76;
+        case 19: return 80;
+        case 20: return 84;
         default: return 4;
         }
     }
