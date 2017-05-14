@@ -165,16 +165,13 @@ class BootmarkController extends Controller
         }
         $grid_height = abs(floatval($north_west["lat"]) - floatval($south_west["lat"])) / $div_amt;
 
-        $bootmarks = [];
-
         for($i = 0; $i < $div_amt; $i++) {
-            for($x = 0; $x < $div_amt; $x++) {
+            for($j = 0; $j < $div_amt; $j++) {
 	            $nw_lat = $north_west["lat"] - ($grid_height * $i);
-                $nw_lng = $this->calc_coord($north_west["lng"], $grid_width, $x);
+                $nw_lng = $this->calc_coord($north_west["lng"], $grid_width, $j);
 
                 $se_lat = $north_west["lat"] - ($grid_height * ($i + 1));
-                $se_lng = $this->calc_coord($north_west["lng"], $grid_width, $x + 1);
-                //dd(array("nw_lat"=>$nw_lat, "nw_lng"=>$nw_lng, "se_lat"=>$se_lat, "se_lng"=>$se_lng, "grid_width"=>$grid_width, "grid_height"=>$grid_height));
+                $se_lng = $this->calc_coord($north_west["lng"], $grid_width, $j + 1);
 
                 /* ST_MakeEnvelope(LEFT, BOTTOM, RIGHT, TOP, SRID) -- https://gis.stackexchange.com/questions/25797/select-bounding-box-using-postgis */
                 $grid_query = Bootmark::selectRaw("id, location, description, lat, lng, discoverable")
