@@ -167,7 +167,7 @@ class BootmarkController extends Controller
 
         for($i = 0; $i < $div_amt; $i++) {
             for($j = 0; $j < $div_amt; $j++) {
-	            $nw_lat = $north_west["lat"] - ($grid_height * $i);
+                $nw_lat = $north_west["lat"] - ($grid_height * $i);
                 $nw_lng = $this->calc_coord($north_west["lng"], $grid_width, $j);
 
                 $se_lat = $north_west["lat"] - ($grid_height * ($i + 1));
@@ -206,15 +206,15 @@ class BootmarkController extends Controller
                     $y = [];
                     $z = [];
 
-                    for ($i = 0; $i < count($lats); $i++) {
+                    for ($k = 0; $k < count($lats); $k++) {
                         /* Convert to radians */
-                        $lats[$i] = $lats[$i] * pi() / 180;
-                        $lngs[$i] = $lngs[$i] * pi() / 180;
+                        $lats[$k] = $lats[$k] * pi() / 180;
+                        $lngs[$k] = $lngs[$k] * pi() / 180;
 
                         /* Get computations for each x, y, z */
-                        $x[] = cos($lats[$i]) * cos($lngs[$i]);
-                        $y[] = cos($lats[$i]) * sin($lngs[$i]);
-                        $z[] = sin($lats[$i]);
+                        $x[] = cos($lats[$k]) * cos($lngs[$k]);
+                        $y[] = cos($lats[$k]) * sin($lngs[$k]);
+                        $z[] = sin($lats[$k]);
                     }
 
                     /* Get average */
@@ -253,7 +253,7 @@ class BootmarkController extends Controller
      *
      * @param Integer $zoom
      *
-     * @return 
+     * @return
      */
     private function getDividerAmount($zoom)
     {
