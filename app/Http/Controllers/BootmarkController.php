@@ -258,26 +258,26 @@ class BootmarkController extends Controller
     private function getDividerAmount($zoom)
     {
         switch ($zoom) {
-        case 1:  return 8;
-        case 2:  return 12;
-        case 3:  return 16;
-        case 4:  return 20;
-        case 5:  return 24;
-        case 6:  return 28;
-        case 7:  return 32;
-        case 8:  return 36;
-        case 9:  return 40;
-        case 10: return 44;
-        case 11: return 48;
-        case 12: return 52;
-        case 13: return 56;
-        case 14: return 60;
-        case 15: return 64;
-        case 16: return 68;
-        case 17: return 72;
-        case 18: return 76;
-        case 19: return 80;
-        case 20: return 84;
+        case 1:  return 6;
+        case 2:  return 8;
+        case 3:  return 10;
+        case 4:  return 12;
+        case 5:  return 14;
+        case 6:  return 16;
+        case 7:  return 18;
+        case 8:  return 20;
+        case 9:  return 22;
+        case 10: return 24;
+        case 11: return 26;
+        case 12: return 28;
+        case 13: return 30;
+        case 14: return 32;
+        case 15: return 34;
+        case 16: return 36;
+        case 17: return 38;
+        case 18: return 40;
+        case 19: return 42;
+        case 20: return 44;
         default: return 4;
         }
     }
