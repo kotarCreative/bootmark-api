@@ -187,7 +187,7 @@ class BootmarkController extends Controller
                                               ->whereRaw("geometry(coordinates) && $envelope");
                                    }
                                })
-                               ->join('users', 'users.id', '=', 'bootmarks.id')
+                               ->join('users', 'users.id', '=', 'bootmarks.user_id')
                                ->get();
 
                 $count = $grid_query->count();
