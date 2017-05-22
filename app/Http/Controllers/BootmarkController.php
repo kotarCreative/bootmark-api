@@ -134,19 +134,61 @@ class BootmarkController extends Controller
         }
     }
 
-    /**
-     * Returns a cluster of bootmarks for a specific quadrant.
-     *
-     * @param Request $request
-     */
-    public function cluster(Request $request)
+
+    public function getCluster(Request $request)
     {
         $user_id = Auth::user()->id;
 
         $this->validate($request, [
             'northWest'  => 'required', 'northWest.lng'  => 'required', 'northWest.lat'  => 'required',
-            'northEast'  => 'required', 'northEast.lng'  => 'required', 'northEast.lat'  => 'required',
-            'southWest'  => 'required', 'southWest.lng'  => 'required', 'southWest.lat'  => 'required',
+            'southEast'  => 'required', 'southEast.lng'  => 'required', 'southEast.lat'  => 'required',
+        ]);
+
+        $nw = $request->input("northWest");
+        $ne = $request->input("northEast");
+        $sw = $request->input("southWest");
+        $se = $request->input("southEast");
+
+        $nw_lat = $nw["lat"];
+        $nw_lng = $nw["lng"];
+
+        $se_lat = $se["lat"];
+        $se_lng = $se["lng"];
+
+        /* ST_MakeEnvelope(LEFT, BOTTOM, RIGHT, TOP, SRID) -- https://gis.stackexchange.com/questions/25797/select-bounding-box-using-postgis */
+        $grid_query = Bootmark::selectRaw("bootmarks.id, users.id as user_id, users.name, description, location, discoverable, type, bootmarks.created_at")
+                          ->whereExists(function($query) use ($nw_lat, $nw_lng, $se_lat, $se_lng) {
+                              if ($nw_lng > $se_lng) {
+                                  $envelope_1 = "ST_MakeEnvelope($nw_lng, $se_lat, 180, $nw_lat, 4326)";
+                                  $envelope_2 = "ST_MakeEnvelope(-180, $se_lat, $se_lng, $nw_lat, 4326)";
+                                  $query->select(DB::raw(1))
+                                      ->whereRaw("(geometry(coordinates) && $envelope_1) OR (geometry(coordinates) && $envelope_2)");
+                              } else {
+                                   $envelope = "ST_MakeEnvelope($nw_lng, $se_lat, $se_lng, $nw_lat, 4326)";
+                                   $query->select(DB::raw(1))
+                                       ->whereRaw("geometry(coordinates) && $envelope");
+                                   }
+                               })
+                           ->join('users', 'users.id', '=', 'bootmarks.user_id')
+                           ->paginate(20);
+
+         return response()->json([
+             'response' => 'success',
+             'bootmarks' => $grid_query
+         ]);
+    }
+
+    /**
+     * Returns the grids of clusters for bootmarks in a quadrant.
+     *
+     * @param Request $request
+     */
+    public function getGrids(Request $request)
+    {
+        $user_id = Auth::user()->id;
+
+        $this->validate($request, [
+            'northWest'  => 'required', 'northWest.lng'  => 'required', 'northWest.lat'  => 'required',
             'southEast'  => 'required', 'southEast.lng'  => 'required', 'southEast.lat'  => 'required',
             'zoomLevel'  => 'required'
         ]);
@@ -154,16 +196,14 @@ class BootmarkController extends Controller
         $div_amt = $this->getDividerAmount($request->input("zoomLevel"));
 
         $north_west = $request->input("northWest");
-        $north_east = $request->input("northEast");
-        $south_west = $request->input("southWest");
         $south_east = $request->input("southEast");
 
-        if (floatval($north_west["lng"]) > floatval($north_east["lng"])) {
-            $grid_width = ((180 - floatval($north_west["lng"])) + (180 - abs(floatval($north_east["lng"])))) / $div_amt;
+        if (floatval($north_west["lng"]) > floatval($south_east["lng"])) {
+            $grid_width = ((180 - floatval($north_west["lng"])) + (180 - abs(floatval($south_east["lng"])))) / $div_amt;
         } else {
-            $grid_width = abs(floatval($north_west["lng"]) - floatval($north_east["lng"])) / $div_amt;
+            $grid_width = abs(floatval($north_west["lng"]) - floatval($south_east["lng"])) / $div_amt;
         }
-        $grid_height = abs(floatval($north_west["lat"]) - floatval($south_west["lat"])) / $div_amt;
+        $grid_height = abs(floatval($north_west["lat"]) - floatval($south_east["lat"])) / $div_amt;
 
         for($i = 0; $i < $div_amt; $i++) {
             for($j = 0; $j < $div_amt; $j++) {
@@ -172,12 +212,6 @@ class BootmarkController extends Controller
 
                 $se_lat = $north_west["lat"] - ($grid_height * ($i + 1));
                 $se_lng = $this->calc_coord($north_west["lng"], $grid_width, $j + 1);
-
-                $ne_lat = $nw_lat;
-                $ne_lng = $se_lng;
-
-                $sw_lat = $se_lat;
-                $sw_lng = $nw_lng;
 
                 /* ST_MakeEnvelope(LEFT, BOTTOM, RIGHT, TOP, SRID) -- https://gis.stackexchange.com/questions/25797/select-bounding-box-using-postgis */
                 $grid_query = Bootmark::selectRaw("lat, lng")
@@ -204,8 +238,6 @@ class BootmarkController extends Controller
                                     'lat'       => '',
                                     'lng'       => '',
                                     'northWest' => ['lat' => $nw_lat, 'lng' => $nw_lng],
-                                    'northEast' => ['lat' => $ne_lat, 'lng' => $ne_lng],
-                                    'southWest' => ['lat' => $sw_lat, 'lng' => $sw_lng],
                                     'southEast' => ['lat' => $se_lat, 'lng' => $se_lng]
                                  ];
                     break;
@@ -215,8 +247,6 @@ class BootmarkController extends Controller
                                     'lat'       => $grid_query[0]["lat"],
                                     'lng'       => $grid_query[0]["lng"],
                                     'northWest' => ['lat' => $nw_lat, 'lng' => $nw_lng],
-                                    'northEast' => ['lat' => $ne_lat, 'lng' => $ne_lng],
-                                    'southWest' => ['lat' => $sw_lat, 'lng' => $sw_lng],
                                     'southEast' => ['lat' => $se_lat, 'lng' => $se_lng]
                                  ];
                     break;
@@ -255,8 +285,6 @@ class BootmarkController extends Controller
                                     'lat'       => $mkr_lat,
                                     'lng'       => $mkr_lng,
                                     'northWest' => ['lat' => $nw_lat, 'lng' => $nw_lng],
-                                    'northEast' => ['lat' => $ne_lat, 'lng' => $ne_lng],
-                                    'southWest' => ['lat' => $sw_lat, 'lng' => $sw_lng],
                                     'southEast' => ['lat' => $se_lat, 'lng' => $se_lng]
                                  ];
                 }
