@@ -173,8 +173,14 @@ class BootmarkController extends Controller
                 $se_lat = $north_west["lat"] - ($grid_height * ($i + 1));
                 $se_lng = $this->calc_coord($north_west["lng"], $grid_width, $j + 1);
 
+                $ne_lat = $nw_lat;
+                $ne_lng = $se_lng;
+
+                $sw_lat = $se_lat;
+                $sw_lng = $nw_lng;
+
                 /* ST_MakeEnvelope(LEFT, BOTTOM, RIGHT, TOP, SRID) -- https://gis.stackexchange.com/questions/25797/select-bounding-box-using-postgis */
-                $grid_query = Bootmark::selectRaw("bootmarks.id, users.id as user_id, users.name, description, location, lat, lng, discoverable, type, bootmarks.created_at")
+                $grid_query = Bootmark::selectRaw("lat, lng")
                                ->whereExists(function($query) use ($nw_lat, $nw_lng, $se_lat, $se_lng) {
                                    if ($nw_lng > $se_lng) {
                                         $envelope_1 = "ST_MakeEnvelope($nw_lng, $se_lat, 180, $nw_lat, 4326)";
@@ -187,16 +193,32 @@ class BootmarkController extends Controller
                                               ->whereRaw("geometry(coordinates) && $envelope");
                                    }
                                })
-                               ->join('users', 'users.id', '=', 'bootmarks.user_id')
                                ->get();
 
                 $count = $grid_query->count();
+
                 switch ($count) {
                 case 0:
-                    $markers[] = [ 'lat' => '', 'lng' => '', 'count' => $count, 'bootmarks' => $grid_query ];
+                    $markers[] = [
+                                    'count'     => $count,
+                                    'lat'       => '',
+                                    'lng'       => '',
+                                    'northWest' => ['lat' => $nw_lat, 'lng' => $nw_lng],
+                                    'northEast' => ['lat' => $ne_lat, 'lng' => $ne_lng],
+                                    'southWest' => ['lat' => $sw_lat, 'lng' => $sw_lng],
+                                    'southEast' => ['lat' => $se_lat, 'lng' => $se_lng]
+                                 ];
                     break;
                 case 1:
-                    $markers[] = [ 'lat' => $grid_query[0]["lat"], 'lng' => $grid_query[0]["lng"], 'count' => $count, 'bootmarks' => $grid_query ];
+                    $markers[] = [
+                                    'count'     => $count,
+                                    'lat'       => $grid_query[0]["lat"],
+                                    'lng'       => $grid_query[0]["lng"],
+                                    'northWest' => ['lat' => $nw_lat, 'lng' => $nw_lng],
+                                    'northEast' => ['lat' => $ne_lat, 'lng' => $ne_lng],
+                                    'southWest' => ['lat' => $sw_lat, 'lng' => $sw_lng],
+                                    'southEast' => ['lat' => $se_lat, 'lng' => $se_lng]
+                                 ];
                     break;
                 default:
                     /* Get the lats and lngs for bootmarks */
@@ -228,7 +250,15 @@ class BootmarkController extends Controller
                     $mkr_lat = atan2($z, sqrt(($x * $x) + ($y * $y))) * 180 / pi();
                     $mkr_lng = atan2($y, $x) * 180 / pi();
 
-                    $markers[] = [ 'lat' => $mkr_lat, 'lng' => $mkr_lng, 'count' => $count, 'bootmarks' => $grid_query ];
+                    $markers[] = [
+                                    'count'     => $count,
+                                    'lat'       => $mkr_lat,
+                                    'lng'       => $mkr_lng,
+                                    'northWest' => ['lat' => $nw_lat, 'lng' => $nw_lng],
+                                    'northEast' => ['lat' => $ne_lat, 'lng' => $ne_lng],
+                                    'southWest' => ['lat' => $sw_lat, 'lng' => $sw_lng],
+                                    'southEast' => ['lat' => $se_lat, 'lng' => $se_lng]
+                                 ];
                 }
             }
        }
