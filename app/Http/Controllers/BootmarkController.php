@@ -170,6 +170,7 @@ class BootmarkController extends Controller
                                    }
                                })
                            ->join('users', 'users.id', '=', 'bootmarks.user_id')
+                           ->orderBy('created_at', 'desc')
                            ->paginate(20);
 
          return response()->json([
