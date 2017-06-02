@@ -17,44 +17,61 @@
         ]); ?>
     </script>
 
+
     <style>
         html {
             margin: 0;
             padding: 0;
+
         }
 
         #app {
+            margin-top:auto;
+            margin-bottom:auto;
             margin-left: auto;
             margin-right: auto;
             width: 250px;
-            align-content: center;
-            border: medium solid rebeccapurple;
-            border-radius: 5%;
         }
 
-        .navbar {
-            text-align: center;
-            border-bottom: medium dashed rebeccapurple;
-            height: 200px;
+
+        .form-control {
+            box-sizing:border-box;
+            margin-top: 10px;
+            border-radius:5px;
+            border:solid 1px grey;
+            font-size: 12px;
+            font-family:Arial;
+            padding: 5px;
+            width: 200px;
         }
+
 
         .container {
-            margin-top: 10px;
-            text-align: center;
-            font-size: larger;
+            text-align: left;
+            font-size: 12px;
+            width:200px;
         }
 
         .btn {
-            margin: 10px;
-            height: 40px;
-            background-color: rebeccapurple;
+            margin-top: 10px;
+            height: 30px;
+            background-color: dimgrey;
             color: white;
-            font-size: 16px;
+            font-size: 12px;
+            font-family: Arial;
+            border-radius: 5px;
+            width: 200px;
         }
 
-        .panel-heading {
-            font-size: larger;
+        .navbar-header{
+            margin-top:50%;
+            height:40px;
         }
+
+        #bootmark-wordmark {
+            max-width: 100%;
+        }
+
     </style>
 
 </head>
@@ -66,7 +83,7 @@
 
                     <!-- Branding Image -->
                     <a class="top-bar" href="http://www.bootmark.ca">
-                        <img src="/img/bootmark_logo.png" alt="Bootmark Logo Icon" style="width:200px;height:200px;">
+                        <img src="/img/wordmark.png" alt="Bootmark Wordmark Icon" id="bootmark-wordmark">
                     </a>
                 </div>
             </div>
