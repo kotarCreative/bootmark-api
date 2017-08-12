@@ -44,11 +44,11 @@ class User extends Authenticatable
     /**
      * Returns all the users that are following this user.
      *
-     * @return array Returns an array of App\Follower
+     * @return array Returns an array of App\Models\Follower
      */
     public function followers()
     {
-	    return $this->belongsToMany('App\User', 'followers', 'user_id', 'follower_id');
+	    return $this->belongsToMany('App\Models\User', 'followers', 'user_id', 'follower_id');
     }
 
     /**
@@ -58,16 +58,16 @@ class User extends Authenticatable
      */
     public function discoveredBootmarks()
     {
-        return $this->belongsTo('App\DiscoveredBootmark');
+        return $this->belongsTo('App\Models\DiscoveredBootmark');
     }
 
     /**
      * Returns all the users that the current user is following
      *
-     * @return array Returns an array of App\Follower
+     * @return array Returns an array of App\Models\Follower
      */
     public function following()
     {
-        return $this->belongsToMany('App\User', 'followers', 'follower_id', 'user_id');
+        return $this->belongsToMany('App\Models\User', 'followers', 'follower_id', 'user_id');
     }
 }

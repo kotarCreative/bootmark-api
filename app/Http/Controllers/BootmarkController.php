@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\SearchBootmarks as Search;
 
 use App\Models\Link, App\Models\Media, App\Models\Photo, App\Models\Bootmark, App\Models\User, App\Models\Follower,
-    App\Models\Vote, App\SimpleScraper, App\Models\Report;
+    App\Models\Vote, App\SimpleScraper, App\Models\Report, App\Models\DiscoveredBootmark;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
@@ -156,7 +156,9 @@ class BootmarkController extends Controller
         $se_lng = $se["lng"];
 
         /* ST_MakeEnvelope(LEFT, BOTTOM, RIGHT, TOP, SRID) -- https://gis.stackexchange.com/questions/25797/select-bounding-box-using-postgis */
-        $grid_query = Bootmark::selectRaw("bootmarks.id, users.id as user_id, users.name, description, location, discoverable, type, bootmarks.created_at")
+        $grid_query = Bootmark::selectRaw("users.name, bootmarks.*, users.id as user_id, media.id as media_id, links.id as link_id,
+                                           links.url, links.title, links.meta_description, links.image_path, media.media_type,
+                                           media.path, media.mime_type, v.vote")
                           ->whereExists(function($query) use ($nw_lat, $nw_lng, $se_lat, $se_lng) {
                               if ($nw_lng > $se_lng) {
                                   $envelope_1 = "ST_MakeEnvelope($nw_lng, $se_lat, 180, $nw_lat, 4326)";
@@ -170,6 +172,10 @@ class BootmarkController extends Controller
                                    }
                                })
                            ->join('users', 'users.id', '=', 'bootmarks.user_id')
+                           ->leftJoin('media', 'bootmarks.media_id', '=', 'media.id')
+                           ->leftJoin('links', 'bootmarks.link_id', '=', 'links.id')
+                           ->leftJoin(DB::raw("(select * from votes where votes.user_id = $user_id) v"), 'bootmarks.id', '=', 'v.bootmark_id')
+                           ->distinct()
                            ->orderBy('created_at', 'desc')
                            ->paginate(20);
 
