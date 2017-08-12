@@ -8,7 +8,7 @@ use LucaDegasperi\OAuth2Server\Facades\Authorizer;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Http\Request;
 
-use App\User;
+use App\Models\User;
 
 class oAuthController extends Controller
 {

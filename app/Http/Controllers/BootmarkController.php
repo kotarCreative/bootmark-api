@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\HttpResponse;
+use App\Models\HttpResponse;
 use App\Jobs\MailReport;
-use App\Photo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\SearchBootmarks as Search;
 
-use App\Link, App\Media, App\Bootmark, App\User, App\Follower,
-    App\Vote, App\SimpleScraper, App\Report;
+use App\Models\Link, App\Models\Media, App\Models\Photo, App\Models\Bootmark, App\Models\User, App\Models\Follower,
+    App\Models\Vote, App\SimpleScraper, App\Models\Report, App\Models\DiscoveredBootmark;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
@@ -62,7 +62,11 @@ class BootmarkController extends Controller
         }
 
         /* Applies the filter that has been selected */
-        $distance_select = "earth_distance(ll_to_earth($lat,$lng), ll_to_earth(lat, lng)) as distance_from_current";
+        //$distance_select = "earth_distance(ll_to_earth($lat,$lng), ll_to_earth(lat, lng)) as distance_from_current";
+
+        /* POSTGIS application of distance select */
+        $distance_select = "ST_Distance(ST_GeographyFromText('SRID=4326;POINT($lng $lat)'), coordinates) as distance_from_current";
+
         if($request->input('filter') == 'closest') {
             $bootmarks = $bootmarks->orderBy('distance_from_current', 'asc');
         } else if($request->input('filter') == 'popular') {
@@ -75,7 +79,8 @@ class BootmarkController extends Controller
 
         /* Finds all bootmarks within the radius given. */
         if($request->has('rad')) {
-            $bootmarks->whereRaw("earth_box(ll_to_earth($lat,$lng), $rad) @> ll_to_earth(lat, lng)");
+            //$bootmarks->whereRaw("earth_box(ll_to_earth($lat,$lng), $rad) @> ll_to_earth(lat, lng)");
+            $bootmarks->whereRaw("ST_DWithin(coordinates, ST_GeographyFromText('SRID=4326;POINT($lng $lat)'), $rad)");
         }
 
         $bootmarks = $bootmarks->join('users','bootmarks.user_id','=','users.id');
@@ -126,6 +131,221 @@ class BootmarkController extends Controller
                 'response' => 'success',
                 'bootmarks' => $bootmarks
             ]);
+        }
+    }
+
+
+    public function getCluster(Request $request)
+    {
+        $user_id = Auth::user()->id;
+
+        $this->validate($request, [
+            'northWest'  => 'required', 'northWest.lng'  => 'required', 'northWest.lat'  => 'required',
+            'southEast'  => 'required', 'southEast.lng'  => 'required', 'southEast.lat'  => 'required',
+        ]);
+
+        $nw = $request->input("northWest");
+        $ne = $request->input("northEast");
+        $sw = $request->input("southWest");
+        $se = $request->input("southEast");
+
+        $nw_lat = $nw["lat"];
+        $nw_lng = $nw["lng"];
+
+        $se_lat = $se["lat"];
+        $se_lng = $se["lng"];
+
+        /* ST_MakeEnvelope(LEFT, BOTTOM, RIGHT, TOP, SRID) -- https://gis.stackexchange.com/questions/25797/select-bounding-box-using-postgis */
+        $grid_query = Bootmark::selectRaw("users.name, bootmarks.*, users.id as user_id, media.id as media_id, links.id as link_id,
+                                           links.url, links.title, links.meta_description, links.image_path, media.media_type,
+                                           media.path, media.mime_type, v.vote")
+                          ->whereExists(function($query) use ($nw_lat, $nw_lng, $se_lat, $se_lng) {
+                              if ($nw_lng > $se_lng) {
+                                  $envelope_1 = "ST_MakeEnvelope($nw_lng, $se_lat, 180, $nw_lat, 4326)";
+                                  $envelope_2 = "ST_MakeEnvelope(-180, $se_lat, $se_lng, $nw_lat, 4326)";
+                                  $query->select(DB::raw(1))
+                                      ->whereRaw("(geometry(coordinates) && $envelope_1) OR (geometry(coordinates) && $envelope_2)");
+                              } else {
+                                   $envelope = "ST_MakeEnvelope($nw_lng, $se_lat, $se_lng, $nw_lat, 4326)";
+                                   $query->select(DB::raw(1))
+                                       ->whereRaw("geometry(coordinates) && $envelope");
+                                   }
+                               })
+                           ->join('users', 'users.id', '=', 'bootmarks.user_id')
+                           ->leftJoin('media', 'bootmarks.media_id', '=', 'media.id')
+                           ->leftJoin('links', 'bootmarks.link_id', '=', 'links.id')
+                           ->leftJoin(DB::raw("(select * from votes where votes.user_id = $user_id) v"), 'bootmarks.id', '=', 'v.bootmark_id')
+                           ->distinct()
+                           ->orderBy('created_at', 'desc')
+                           ->paginate(20);
+
+         return response()->json([
+             'response' => 'success',
+             'bootmarks' => $grid_query
+         ]);
+    }
+
+    /**
+     * Returns the grids of clusters for bootmarks in a quadrant.
+     *
+     * @param Request $request
+     */
+    public function getGrids(Request $request)
+    {
+        $user_id = Auth::user()->id;
+
+        $this->validate($request, [
+            'northWest'  => 'required', 'northWest.lng'  => 'required', 'northWest.lat'  => 'required',
+            'southEast'  => 'required', 'southEast.lng'  => 'required', 'southEast.lat'  => 'required',
+            'zoomLevel'  => 'required'
+        ]);
+
+        $div_amt = $this->getDividerAmount($request->input("zoomLevel"));
+
+        $north_west = $request->input("northWest");
+        $south_east = $request->input("southEast");
+
+        if (floatval($north_west["lng"]) > floatval($south_east["lng"])) {
+            $grid_width = ((180 - floatval($north_west["lng"])) + (180 - abs(floatval($south_east["lng"])))) / $div_amt;
+        } else {
+            $grid_width = abs(floatval($north_west["lng"]) - floatval($south_east["lng"])) / $div_amt;
+        }
+        $grid_height = abs(floatval($north_west["lat"]) - floatval($south_east["lat"])) / $div_amt;
+
+        for($i = 0; $i < $div_amt; $i++) {
+            for($j = 0; $j < $div_amt; $j++) {
+                $nw_lat = $north_west["lat"] - ($grid_height * $i);
+                $nw_lng = $this->calc_coord($north_west["lng"], $grid_width, $j);
+
+                $se_lat = $north_west["lat"] - ($grid_height * ($i + 1));
+                $se_lng = $this->calc_coord($north_west["lng"], $grid_width, $j + 1);
+
+                /* ST_MakeEnvelope(LEFT, BOTTOM, RIGHT, TOP, SRID) -- https://gis.stackexchange.com/questions/25797/select-bounding-box-using-postgis */
+                $grid_query = Bootmark::selectRaw("lat, lng")
+                               ->whereExists(function($query) use ($nw_lat, $nw_lng, $se_lat, $se_lng) {
+                                   if ($nw_lng > $se_lng) {
+                                        $envelope_1 = "ST_MakeEnvelope($nw_lng, $se_lat, 180, $nw_lat, 4326)";
+                                        $envelope_2 = "ST_MakeEnvelope(-180, $se_lat, $se_lng, $nw_lat, 4326)";
+                                        $query->select(DB::raw(1))
+                                              ->whereRaw("(geometry(coordinates) && $envelope_1) OR (geometry(coordinates) && $envelope_2)");
+                                   } else {
+                                        $envelope = "ST_MakeEnvelope($nw_lng, $se_lat, $se_lng, $nw_lat, 4326)";
+                                        $query->select(DB::raw(1))
+                                              ->whereRaw("geometry(coordinates) && $envelope");
+                                   }
+                               })
+                               ->get();
+
+                $count = $grid_query->count();
+
+                switch ($count) {
+                case 0:
+                    $markers[] = [
+                                    'count'     => $count,
+                                    'lat'       => '',
+                                    'lng'       => '',
+                                    'northWest' => ['lat' => $nw_lat, 'lng' => $nw_lng],
+                                    'southEast' => ['lat' => $se_lat, 'lng' => $se_lng]
+                                 ];
+                    break;
+                case 1:
+                    $markers[] = [
+                                    'count'     => $count,
+                                    'lat'       => $grid_query[0]["lat"],
+                                    'lng'       => $grid_query[0]["lng"],
+                                    'northWest' => ['lat' => $nw_lat, 'lng' => $nw_lng],
+                                    'southEast' => ['lat' => $se_lat, 'lng' => $se_lng]
+                                 ];
+                    break;
+                default:
+                    /* Get the lats and lngs for bootmarks */
+                    $lats = $grid_query->pluck('lat');
+                    $lngs = $grid_query->pluck('lng');
+
+                    /* Initialize */
+                    $x = [];
+                    $y = [];
+                    $z = [];
+
+                    for ($k = 0; $k < count($lats); $k++) {
+                        /* Convert to radians */
+                        $lats[$k] = $lats[$k] * pi() / 180;
+                        $lngs[$k] = $lngs[$k] * pi() / 180;
+
+                        /* Get computations for each x, y, z */
+                        $x[] = cos($lats[$k]) * cos($lngs[$k]);
+                        $y[] = cos($lats[$k]) * sin($lngs[$k]);
+                        $z[] = sin($lats[$k]);
+                    }
+
+                    /* Get average */
+                    $x = array_sum($x) / $count;
+                    $y = array_sum($y) / $count;
+                    $z = array_sum($z) / $count;
+
+                    /* Get coordinate and convert to degrees */
+                    $mkr_lat = atan2($z, sqrt(($x * $x) + ($y * $y))) * 180 / pi();
+                    $mkr_lng = atan2($y, $x) * 180 / pi();
+
+                    $markers[] = [
+                                    'count'     => $count,
+                                    'lat'       => $mkr_lat,
+                                    'lng'       => $mkr_lng,
+                                    'northWest' => ['lat' => $nw_lat, 'lng' => $nw_lng],
+                                    'southEast' => ['lat' => $se_lat, 'lng' => $se_lng]
+                                 ];
+                }
+            }
+       }
+
+       return response()->json([
+           'response' => 'Success',
+           'markers' => $markers
+       ]);
+    }
+
+
+    private function calc_coord($lng, $width, $idx)
+    {
+        /* Checks for longitude wrapping  */
+        if (($lng + ($width * $idx)) > 180) {
+            return $lng + ($width * $idx) - 360;
+        } else {
+            return $lng + ($width * $idx);
+        }
+    }
+
+    /**
+     * Gets the amount of dividers to create based on the zoom level.
+     *
+     * @param Integer $zoom
+     *
+     * @return
+     */
+    private function getDividerAmount($zoom)
+    {
+        switch ($zoom) {
+        case 1:  return 6;
+        case 2:  return 8;
+        case 3:  return 10;
+        case 4:  return 12;
+        case 5:  return 14;
+        case 6:  return 16;
+        case 7:  return 18;
+        case 8:  return 20;
+        case 9:  return 22;
+        case 10: return 24;
+        case 11: return 26;
+        case 12: return 28;
+        case 13: return 30;
+        case 14: return 32;
+        case 15: return 34;
+        case 16: return 36;
+        case 17: return 38;
+        case 18: return 40;
+        case 19: return 42;
+        case 20: return 44;
+        default: return 4;
         }
     }
 
@@ -327,6 +547,19 @@ class BootmarkController extends Controller
                 ]);
         }
     }
+
+    /**
+     * Search for bootmarks within a specific lat and lng.
+     *
+     * @param \App\Http\Requests\SearchBootmarks $request
+     *
+     * @return json
+     */
+    public function search(Search $request)
+    {
+
+    }
+
 
     /**
      * Checks to see if the user has voted on a bootmark already.

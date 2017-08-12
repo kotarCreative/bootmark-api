@@ -6,7 +6,7 @@ use App\HttpResponse;
 use App\Jobs\MailReport;
 use Illuminate\Http\Request;
 
-use App\Comment, App\Report, App\Bootmark, App\User;
+use App\Models\Comment, App\Models\Report, App\Models\Bootmark, App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
