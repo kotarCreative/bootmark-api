@@ -220,7 +220,10 @@ class BootmarkController extends Controller
                 $se_lat = $north_west["lat"] - ($grid_height * ($i + 1));
                 $se_lng = $this->calc_coord($north_west["lng"], $grid_width, $j + 1);
 
-                /* ST_MakeEnvelope(LEFT, BOTTOM, RIGHT, TOP, SRID) -- https://gis.stackexchange.com/questions/25797/select-bounding-box-using-postgis */
+                /**
+                 * ST_MakeEnvelope(LEFT, BOTTOM, RIGHT, TOP, SRID)
+                 * https://gis.stackexchange.com/questions/25797/select-bounding-box-using-postgis
+                 */
                 $grid_query = Bootmark::selectRaw("lat, lng")
                                ->whereExists(function($query) use ($nw_lat, $nw_lng, $se_lat, $se_lng) {
                                    if ($nw_lng > $se_lng) {
@@ -359,7 +362,7 @@ class BootmarkController extends Controller
     public function store(Request $request)
     {
         /* Create new Bootmark and set the user_id */
-        $bootmark = new Bootmark;
+        $bootmark = new Bootmark();
         $bootmark->user_id = Auth::user()->id;
 
 
@@ -395,15 +398,21 @@ class BootmarkController extends Controller
         } else {
             $bootmark->type = "text";
         }
+        $lng = $request->input('lng');
+        $lat = $request->input('lat');
 
         /* Set all other values */
         $bootmark->location = $request->input('location');
         $bootmark->karma = 0;
         $bootmark->description = $request->input('description');
-        $bootmark->lat = $request->input('lat');
-        $bootmark->lng = $request->input('lng');
+        $bootmark->lat = $lat;
+        $bootmark->lng = $lng;
         $bootmark->remote = $request->input('remote');
         $bootmark->discoverable = $request->input('discoverable');
+        $bootmark->coordinates = [
+            'lng'   => $lng,
+            'lat'   => $lat
+        ];
 
         /* Save Bootmark*/
         $bootmark->save();
