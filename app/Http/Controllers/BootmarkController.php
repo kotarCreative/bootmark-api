@@ -180,8 +180,8 @@ class BootmarkController extends Controller
                            ->paginate(20);
 
          return response()->json([
-             'response' => 'success',
-             'bootmarks' =>
+             'response'     => 'success',
+             'bootmarks'    => $grid_query
          ]);
     }
 
@@ -192,12 +192,42 @@ class BootmarkController extends Controller
     *
     * @return json Returns a json array of all bootmarks.
     */
-    public function show(Bootmark $bootmark)
+    public function show(Request $request, Bootmark $bootmark)
     {
+        $user_id = Auth::user()->id;
+
+        $bootmark_query = DB::table('bootmarks')
+            ->leftJoin('media','bootmarks.media_id','=','media.id')
+            ->leftJoin('links','bootmarks.link_id','=','links.id')
+            ->leftJoin(DB::raw("(select * from votes where votes.user_id = $user_id) v"),'bootmarks.id', '=', 'v.bootmark_id')
+            ->leftJoin('users', 'bootmarks.user_id', 'users.id')
+            ->distinct()
+            ->where('bootmarks.id', $bootmark->id);
+
+        if ($request->has('lat') && $request->has('lng')) {
+            $lat = $request->lat;
+            $lng = $request->lng;
+            $distance_select = "ST_Distance(ST_GeographyFromText('SRID=4326;POINT($lng $lat)'), coordinates) as distance_from_current";
+        } else {
+            $distance_select = "";
+        }
+
         return response()->json([
              'response' => 'Success',
-             'data' => $bootmark
-         ]);
+             'data' => $bootmark_query->select(
+                 DB::raw($distance_select),
+                 'users.name',
+                 'bootmarks.*',
+                 'links.url',
+                 'links.title',
+                 'links.meta_description',
+                 'links.image_path',
+                 'media.media_type',
+                 'media.path',
+                 'media.mime_type',
+                 'v.vote'
+             )->get()
+        ]);
     }
 
     /**
