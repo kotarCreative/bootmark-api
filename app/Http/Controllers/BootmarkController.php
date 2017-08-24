@@ -181,7 +181,22 @@ class BootmarkController extends Controller
 
          return response()->json([
              'response' => 'success',
-             'bootmarks' => $grid_query
+             'bootmarks' =>
+         ]);
+    }
+
+    /**
+    * Returns a single bootmark
+    *
+    * @param Bootmark $bootmark
+    *
+    * @return json Returns a json array of all bootmarks.
+    */
+    public function show(Bootmark $bootmark)
+    {
+        return response()->json([
+             'response' => 'Success',
+             'data' => $bootmark
          ]);
     }
 

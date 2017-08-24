@@ -27,7 +27,7 @@ Route::group(['prefix' => 'v1', 'middleware' => 'auth:api'], function () {
 
     Route::post('bootmarks/{bootmark}/vote','BootmarkController@vote');
     Route::post('bootmarks/{bootmark}/report','BootmarkController@report');
-    Route::resource('bootmarks', 'BootmarkController', ['except' => ['create', 'show', 'edit']]);
+    Route::resource('bootmarks', 'BootmarkController', ['except' => ['create', 'edit']]);
 
     /* Comment Requests */
     Route::post('comments/{comment}/report','CommentController@report');
