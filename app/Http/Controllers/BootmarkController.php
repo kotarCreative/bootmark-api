@@ -288,13 +288,7 @@ class BootmarkController extends Controller
 
                 switch ($count) {
                 case 0:
-                    $markers[] = [
-                                    'count'     => $count,
-                                    'lat'       => '',
-                                    'lng'       => '',
-                                    'northWest' => ['lat' => $nw_lat, 'lng' => $nw_lng],
-                                    'southEast' => ['lat' => $se_lat, 'lng' => $se_lng]
-                                 ];
+                    /* Do nothing */
                     break;
                 case 1:
                     $markers[] = [
