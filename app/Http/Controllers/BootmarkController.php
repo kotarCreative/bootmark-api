@@ -256,7 +256,9 @@ class BootmarkController extends Controller
             $grid_width = abs(floatval($north_west["lng"]) - floatval($south_east["lng"])) / $div_amt;
         }
         $grid_height = abs(floatval($north_west["lat"]) - floatval($south_east["lat"])) / $div_amt;
-
+        $markers = [];
+        $all_marker_lats = [];
+        $all_marker_lngs = [];
         for($i = 0; $i < $div_amt; $i++) {
             for($j = 0; $j < $div_amt; $j++) {
                 $nw_lat = $north_west["lat"] - ($grid_height * $i);
@@ -285,19 +287,23 @@ class BootmarkController extends Controller
                                ->get();
 
                 $count = $grid_query->count();
-
                 switch ($count) {
                 case 0:
                     /* Do nothing */
                     break;
                 case 1:
-                    $markers[] = [
-                                    'count'     => $count,
-                                    'lat'       => $grid_query[0]["lat"],
-                                    'lng'       => $grid_query[0]["lng"],
-                                    'northWest' => ['lat' => $nw_lat, 'lng' => $nw_lng],
-                                    'southEast' => ['lat' => $se_lat, 'lng' => $se_lng]
-                                 ];
+                    $key = array_search($grid_query[0]["lat"], $all_marker_lats);
+                    if ($key === false || ($key !== false && $all_marker_lngs[$key] != $grid_query[0]["lng"])) {
+                        $markers[] = [
+                                        'count'     => $count,
+                                        'lat'       => $grid_query[0]["lat"],
+                                        'lng'       => $grid_query[0]["lng"],
+                                        'northWest' => ['lat' => $nw_lat, 'lng' => $nw_lng],
+                                        'southEast' => ['lat' => $se_lat, 'lng' => $se_lng]
+                                     ];
+                        $all_marker_lats[] = $grid_query[0]["lat"];
+                        $all_marker_lngs[] = $grid_query[0]["lng"];
+                    }
                     break;
                 default:
                     /* Get the lats and lngs for bootmarks */
@@ -326,16 +332,21 @@ class BootmarkController extends Controller
                     $z = array_sum($z) / $count;
 
                     /* Get coordinate and convert to degrees */
-                    $mkr_lat = atan2($z, sqrt(($x * $x) + ($y * $y))) * 180 / pi();
-                    $mkr_lng = atan2($y, $x) * 180 / pi();
+                    $mkr_lat = (string)atan2($z, sqrt(($x * $x) + ($y * $y))) * 180 / pi();
+                    $mkr_lng = (string)atan2($y, $x) * 180 / pi();
 
-                    $markers[] = [
-                                    'count'     => $count,
+                    $key = array_search($mkr_lat, $all_marker_lats);
+                    if ($key === false || ($key !== false && $all_marker_lngs[$key] != $mkr_lng)) {
+                        $markers[] = [
+                                   'count'     => $count,
                                     'lat'       => $mkr_lat,
                                     'lng'       => $mkr_lng,
                                     'northWest' => ['lat' => $nw_lat, 'lng' => $nw_lng],
                                     'southEast' => ['lat' => $se_lat, 'lng' => $se_lng]
                                  ];
+                        $all_marker_lats[] = $mkr_lat;
+                        $all_marker_lngs[] = $mkr_lng;
+                    }
                 }
             }
        }
