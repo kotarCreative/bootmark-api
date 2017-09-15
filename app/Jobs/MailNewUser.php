@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\User, App\Report;
+use App\Models\User, App\Models\Report;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
